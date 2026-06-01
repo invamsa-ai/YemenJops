@@ -478,7 +478,7 @@ function openAddJobModal() {
 }
 
 function editJob(jobId) {
-    const job = adminJobs.find(j => j.id === jobId);
+    const job = adminJobs.find(j => String(j.id) === String(jobId));
     if (!job) return;
     
     document.getElementById('jobModalTitle').textContent = 'تعديل وظيفة';
@@ -619,15 +619,32 @@ function viewApplicant(appId) {
         ? new Date(app.appliedAt.seconds ? app.appliedAt.seconds * 1000 : app.appliedAt).toLocaleDateString('ar')
         : 'غير محدد';
     
+    // زر تحميل السيرة الذاتية
+    let cvDownloadButton = '';
+    if (app.cvBase64) {
+        cvDownloadButton = `
+            <a href="${app.cvBase64}" download="${app.cvFileName || 'السيرة_الذاتية.pdf'}" 
+               class="btn btn-primary" style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;">
+                <i class="fas fa-download"></i> تحميل السيرة الذاتية
+            </a>
+        `;
+    } else {
+        cvDownloadButton = '<p style="color:var(--text-muted);margin-top:10px;"><i class="fas fa-info-circle"></i> لم يتم رفع سيرة ذاتية</p>';
+    }
+    
     content.innerHTML = `
         <h3 style="margin-bottom:15px;">تفاصيل المتقدم</h3>
         <div style="background:var(--bg-gray);padding:20px;border-radius:var(--radius);">
-            <p><strong>الاسم:</strong> ${app.name}</p>
-            <p><strong>البريد:</strong> ${app.email}</p>
+            <p><strong>الاسم:</strong> ${app.name || app.userName || 'غير محدد'}</p>
+            <p><strong>البريد:</strong> ${app.email || app.userEmail || 'غير محدد'}</p>
             <p><strong>الهاتف:</strong> ${app.phone || 'غير متوفر'}</p>
             <p><strong>الوظيفة:</strong> ${app.jobTitle}</p>
+            <p><strong>الشركة:</strong> ${app.jobCompany || 'غير محدد'}</p>
+            <p><strong>المدينة:</strong> ${app.jobCity || 'غير محدد'}</p>
             <p><strong>تاريخ التقديم:</strong> ${appliedDate}</p>
             <p><strong>الحالة:</strong> ${app.status || 'جديد'}</p>
+            <p><strong>اسم الملف:</strong> ${app.cvFileName || 'غير متوفر'}</p>
+            ${cvDownloadButton}
         </div>
         <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="changeApplicantStatus('${app.id}', 'مقبول')">
@@ -644,7 +661,6 @@ function viewApplicant(appId) {
     
     openModal('applicantDetailModal');
 }
-
 async function changeApplicantStatus(appId, newStatus) {
     const success = await updateApplicantInFirestore(appId, { status: newStatus });
     if (success) {
