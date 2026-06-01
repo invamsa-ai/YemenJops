@@ -1266,45 +1266,51 @@
     </div>
 
     <!-- ============ FOOTER ============ -->
-    <footer class="footer">
-        <div class="footer-inner">
-            <div class="footer-col">
-                <h4>شغلي - وظائف اليمن</h4>
-                <p style="font-size:0.9rem;">أكبر منصة توظيف يمنية تربط بين الباحثين عن عمل وأصحاب العمل في جميع أنحاء الجمهورية اليمنية.</p>
-            </div>
-            <div class="footer-col">
-                <h4>روابط سريعة</h4>
-                <ul>
-                    <li><a href="#">الرئيسية</a></li>
-                    <li><a href="#jobs-section">تصفح الوظائف</a></li>
-                    <li><a href="#employers-section">أصحاب العمل</a></li>
-                    <li><a href="#" onclick="openModal('aboutModal')">عن شغلي</a></li>
-                </ul>
-            </div>
-            <div class="-col">
-                <h4>مدن رئيسية</h4>
-                <ul>
-                    <li><a href="#" onclick="searchByCity('صنعاء')">وظائف صنعاء</a></li>
-                    <li><a href="#" onclick="searchByCity('عدن')">وظائف عدن</a></li>
-                    <li><a href="#" onclick="searchByCity('تعز')">وظائف تعز</a></li>
-                    <li><a href="#" onclick="searchByCity('الحديدة')">وظائف الحديدة</a></li>
-                    <li><a href="#" onclick="searchByCity('المكلا')">وظائف المكلا</a></li>
-                </ul>
-            </div>
-            <div class="-col">
-                <h4>تواصل معنا</h4>
-                <ul>
-                    <li><a href="mailto:info@shaghalniye.com"><i class="fas fa-envelope"></i> info@shaghalniye.com</a></li>
-                    <li><a href="tel:+96712345678"><i class="fas fa-phone"></i> +967 1 234 5678</a></li>
-                    <li><span><i class="fas fa-map-marker-alt"></i> صنعاء، الجمهورية اليمنية</span></li>
-                </ul>
-            </div>
+ <footer class="footer">
+    <div class="footer-inner">
+        <!-- العمود الأول: تعريف المنصة -->
+        <div class="footer-col">
+            <h4>شغلي - وظائف اليمن</h4>
+            <p style="font-size:0.9rem;">أكبر منصة توظيف يمنية تربط بين الباحثين عن عمل وأصحاب العمل في جميع أنحاء الجمهورية اليمنية.</p>
         </div>
-        <div class="-bottom">
-            <p>&copy; 2026 شغلي - جميع الحقوق محفوظة. موقع التوظيف الأول في اليمن.</p>
-        </div>
-    </>
 
+        <!-- العمود الثاني: روابط سريعة -->
+        <div class="footer-col">
+            <h4>روابط سريعة</h4>
+            <ul>
+                <li><a href="#">الرئيسية</a></li>
+                <li><a href="#jobs-section">تصفح الوظائف</a></li>
+                <li><a href="#employers-section">أصحاب العمل</a></li>
+                <li><a href="#" onclick="openModal('aboutModal');return false;">عن شغلي</a></li>
+            </ul>
+        </div>
+
+        <!-- العمود الثالث: مدن رئيسية (تم التصحيح) -->
+        <div class="footer-col">
+            <h4>مدن رئيسية</h4>
+            <ul>
+                <li><a href="?city=صنعاء">وظائف صنعاء</a></li>
+                <li><a href="?city=عدن">وظائف عدن</a></li>
+                <li><a href="?city=تعز">وظائف تعز</a></li>
+                <li><a href="?city=الحديدة">وظائف الحديدة</a></li>
+                <li><a href="?city=المكلا">وظائف المكلا</a></li>
+            </ul>
+        </div>
+
+        <!-- العمود الرابع: تواصل معنا (تم التصحيح) -->
+        <div class="footer-col">
+            <h4>تواصل معنا</h4>
+            <ul>
+                <li><a href="mailto:info@shaghalniye.com"><i class="fas fa-envelope"></i> info@shaghalniye.com</a></li>
+                <li><a href="tel:+96712345678"><i class="fas fa-phone"></i> +967 1 234 5678</a></li>
+                <li><span><i class="fas fa-map-marker-alt"></i> صنعاء، الجمهورية اليمنية</span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 شغلي - جميع الحقوق محفوظة. موقع التوظيف الأول في اليمن.</p>
+    </div>
+</footer>
     <!-- ============ LOGIN MODAL ============ -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal">
