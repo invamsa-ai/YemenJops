@@ -3,418 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - شغلي</title>
+    <title>تسجيل دخول الأدمن - شغلي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
 </head>
-<body class="admin-dashboard-body">
-    <!-- الشريط الجانبي -->
-    <aside class="admin-sidebar" id="adminSidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <i class="fas fa-shield-alt"></i>
-                <span>شغلي | الأدمن</span>
-            </div>
-            <button class="sidebar-toggle" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-        
-        <nav class="sidebar-nav">
-            <a href="#" class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard', this)">
-                <i class="fas fa-th-large"></i>
-                <span>الرئيسية</span>
-            </a>
-            <a href="#" class="nav-item" data-page="jobs" onclick="switchPage('jobs', this)">
-                <i class="fas fa-briefcase"></i>
-                <span>الوظائف</span>
-                <span class="badge" id="jobsCount">0</span>
-            </a>
-            <a href="#" class="nav-item" data-page="applicants" onclick="switchPage('applicants', this)">
-                <i class="fas fa-users"></i>
-                <span>المتقدمين</span>
-                <span class="badge" id="applicantsCount">0</span>
-            </a>
-            <a href="#" class="nav-item" data-page="companies" onclick="switchPage('companies', this)">
-                <i class="fas fa-building"></i>
-                <span>الشركات</span>
-                <span class="badge" id="companiesCount">0</span>
-            </a>
-            <a href="#" class="nav-item" data-page="settings" onclick="switchPage('settings', this)">
-                <i class="fas fa-cog"></i>
-                <span>الإعدادات</span>
-            </a>
-        </nav>
-        
-        <div class="sidebar-footer">
-            <button class="btn-logout" onclick="handleAdminLogout()">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>تسجيل الخروج</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- المحتوى الرئيسي -->
-    <main class="admin-main" id="adminMain">
-        <!-- الرأس العلوي -->
-        <header class="admin-header">
-            <div class="header-left">
-                <button class="menu-toggle-dashboard" onclick="toggleSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h2 id="pageTitle">لوحة التحكم</h2>
-            </div>
-            <div class="header-right">
-                <div class="admin-notifications">
-                    <button class="btn-notification" onclick="showNotifications()">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-dot" id="notificationDot"></span>
-                    </button>
+<body class="admin-login-body">
+    <div class="admin-login-container">
+        <div class="admin-login-card">
+            <div class="admin-login-header">
+                <div class="admin-logo">
+                    <i class="fas fa-shield-alt"></i>
                 </div>
-                <div class="admin-profile">
-                    <span id="adminName">المشرف</span>
-                    <div class="admin-avatar">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                </div>
+                <h1>لوحة تحكم شغلي</h1>
+                <p>تسجيل دخول المشرفين</p>
             </div>
-        </header>
-
-        <!-- صفحات المحتوى -->
-        <div class="admin-content">
-            <!-- صفحة الرئيسية -->
-            <div class="page-content active" id="dashboard-page">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon jobs-icon">
-                            <i class="fas fa-briefcase"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalJobs">0</h3>
-                            <p>الوظائف المنشورة</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon applicants-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalApplicants">0</h3>
-                            <p>المتقدمين</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon companies-icon">
-                            <i class="fas fa-building"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalCompanies">0</h3>
-                            <p>الشركات المسجلة</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon views-icon">
+            
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label for="adminEmail">
+                        <i class="fas fa-envelope"></i> البريد الإلكتروني
+                    </label>
+                    <input type="email" id="adminEmail" placeholder="أدخل البريد الإلكتروني" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminPassword">
+                        <i class="fas fa-lock"></i> كلمة المرور
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="adminPassword" placeholder="أدخل كلمة المرور" required>
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
                             <i class="fas fa-eye"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalViews">0</h3>
-                            <p>مشاهدة اليوم</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-charts">
-                    <div class="chart-card">
-                        <h3>آخر الوظائف المنشورة</h3>
-                        <div class="recent-jobs-list" id="recentJobsList"></div>
-                    </div>
-                    <div class="chart-card">
-                        <h3>آخر المتقدمين</h3>
-                        <div class="recent-applicants-list" id="recentApplicantsList"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- صفحة الوظائف -->
-            <div class="page-content" id="jobs-page">
-                <div class="page-toolbar">
-                    <div class="toolbar-left">
-                        <h3>إدارة الوظائف</h3>
-                    </div>
-                    <div class="toolbar-right">
-                        <button class="btn btn-primary" onclick="openAddJobModal()">
-                            <i class="fas fa-plus"></i> إضافة وظيفة
                         </button>
                     </div>
                 </div>
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>المسمى الوظيفي</th>
-                                <th>الشركة</th>
-                                <th>المدينة</th>
-                                <th>التصنيف</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="jobsTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- صفحة المتقدمين -->
-            <div class="page-content" id="applicants-page">
-                <div class="page-toolbar">
-                    <div class="toolbar-left">
-                        <h3>إدارة المتقدمين</h3>
-                    </div>
-                    <div class="toolbar-right">
-                        <select class="form-select" id="filterApplicantJob" onchange="filterApplicants()">
-                            <option value="">كل الوظائف</option>
-                        </select>
-                        <select class="form-select" id="filterApplicantStatus" onchange="filterApplicants()">
-                            <option value="">كل الحالات</option>
-                            <option value="جديد">جديد</option>
-                            <option value="قيد المراجعة">قيد المراجعة</option>
-                            <option value="مقبول">مقبول</option>
-                            <option value="مرفوض">مرفوض</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>الاسم</th>
-                                <th>الوظيفة</th>
-                                <th>البريد الإلكتروني</th>
-                                <th>تاريخ التقديم</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="applicantsTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- صفحة الشركات -->
-            <div class="page-content" id="companies-page">
-                <div class="page-toolbar">
-                    <div class="toolbar-left">
-                        <h3>إدارة الشركات</h3>
-                    </div>
-                    <div class="toolbar-right">
-                        <button class="btn btn-primary" onclick="openAddCompanyModal()">
-                            <i class="fas fa-plus"></i> إضافة شركة
-                        </button>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>الشعار</th>
-                                <th>الشركة</th>
-                                <th>الصناعة</th>
-                                <th>المدينة</th>
-                                <th>الوظائف</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="companiesTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- صفحة الإعدادات -->
-            <div class="page-content" id="settings-page">
-                <div class="settings-container">
-                    <div class="settings-card">
-                        <h3>إعدادات عامة</h3>
-                        <form id="settingsForm" onsubmit="saveSettings(event)">
-                            <div class="form-group">
-                                <label>اسم الموقع</label>
-                                <input type="text" id="siteName" value="شغلي" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label>البريد الإلكتروني للتواصل</label>
-                                <input type="email" id="siteEmail" value="info@shaghalniye.com" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label>رقم الهاتف</label>
-                                <input type="text" id="sitePhone" value="+967 1 234 5678" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label>العنوان</label>
-                                <input type="text" id="siteAddress" value="صنعاء، الجمهورية اليمنية" class="form-input">
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> حفظ الإعدادات
-                            </button>
-                        </form>
-                    </div>
-                    
-                    <div class="settings-card">
-                        <h3>تغيير كلمة المرور</h3>
-                        <form id="passwordForm" onsubmit="changePassword(event)">
-                            <div class="form-group">
-                                <label>كلمة المرور الحالية</label>
-                                <input type="password" id="currentPassword" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label>كلمة المرور الجديدة</label>
-                                <input type="password" id="newPassword" class="form-input" required minlength="6">
-                            </div>
-                            <div class="form-group">
-                                <label>تأكيد كلمة المرور الجديدة</label>
-                                <input type="password" id="confirmPassword" class="form-input" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-key"></i> تغيير كلمة المرور
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- مودال إضافة/تعديل وظيفة -->
-    <div class="modal-overlay" id="jobModal">
-        <div class="modal admin-modal">
-            <button class="modal-close" onclick="closeModal('jobModal')">&times;</button>
-            <h2 id="jobModalTitle">إضافة وظيفة جديدة</h2>
-            <form id="jobForm" onsubmit="saveJob(event)">
-                <input type="hidden" id="jobId">
-                <div class="form-group">
-                    <label>المسمى الوظيفي</label>
-                    <input type="text" id="jobTitle" class="form-input" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>الشركة</label>
-                        <input type="text" id="jobCompany" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>المدينة</label>
-                        <select id="jobCity" class="form-input" required>
-                            <option value="صنعاء">صنعاء</option>
-                            <option value="عدن">عدن</option>
-                            <option value="تعز">تعز</option>
-                            <option value="الحديدة">الحديدة</option>
-                            <option value="إب">إب</option>
-                            <option value="المكلا">المكلا</option>
-                            <option value="سيئون">سيئون</option>
-                            <option value="ذمار">ذمار</option>
-                            <option value="مأرب">مأرب</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>التصنيف</label>
-                        <select id="jobCategory" class="form-input" required>
-                            <option value="تكنولوجيا المعلومات">تكنولوجيا المعلومات</option>
-                            <option value="الهندسة">الهندسة</option>
-                            <option value="التعليم">التعليم</option>
-                            <option value="الرعاية الصحية">الرعاية الصحية</option>
-                            <option value="المحاسبة والمالية">المحاسبة والمالية</option>
-                            <option value="التسويق والمبيعات">التسويق والمبيعات</option>
-                            <option value="الإدارة">الإدارة</option>
-                            <option value="الخدمات اللوجستية">الخدمات اللوجستية</option>
-                            <option value="المنظمات غير الحكومية">المنظمات غير الحكومية</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>نوع الوظيفة</label>
-                        <select id="jobType" class="form-input" required>
-                            <option value="دوام كامل">دوام كامل</option>
-                            <option value="دوام جزئي">دوام جزئي</option>
-                            <option value="عن بعد">عن بعد</option>
-                            <option value="مشروع مؤقت">مشروع مؤقت</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>الراتب (ريال يمني)</label>
-                    <input type="text" id="jobSalary" class="form-input" placeholder="مثال: 250,000">
-                </div>
-                <div class="form-group">
-                    <label>الوصف الوظيفي</label>
-                    <textarea id="jobDescription" class="form-input" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>المهارات المطلوبة (مفصولة بفواصل)</label>
-                    <input type="text" id="jobTags" class="form-input" placeholder="React, JavaScript, CSS">
-                </div>
-                <div class="form-checkboxes">
+                
+                <div class="form-group remember-me">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="jobFeatured">
-                        <span>وظيفة مميزة</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="jobUrgent">
-                        <span>وظيفة عاجلة</span>
+                        <input type="checkbox" id="rememberMe">
+                        <span>تذكرني</span>
                     </label>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-save"></i> حفظ الوظيفة
+                
+                <button type="submit" class="btn-admin-login">
+                    <i class="fas fa-sign-in-alt"></i> دخول لوحة التحكم
                 </button>
             </form>
+            
+            <div class="admin-login-footer">
+                <a href="index.html"><i class="fas fa-arrow-right"></i> العودة للموقع</a>
+            </div>
         </div>
-    </div>
-
-    <!-- مودال إضافة شركة -->
-    <div class="modal-overlay" id="companyModal">
-        <div class="modal admin-modal">
-            <button class="modal-close" onclick="closeModal('companyModal')">&times;</button>
-            <h2>إضافة شركة جديدة</h2>
-            <form id="companyForm" onsubmit="saveCompany(event)">
-                <div class="form-group">
-                    <label>اسم الشركة</label>
-                    <input type="text" id="companyName" class="form-input" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>الصناعة</label>
-                        <input type="text" id="companyIndustry" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>المدينة</label>
-                        <select id="companyCity" class="form-input" required>
-                            <option value="صنعاء">صنعاء</option>
-                            <option value="عدن">عدن</option>
-                            <option value="تعز">تعز</option>
-                            <option value="الحديدة">الحديدة</option>
-                            <option value="إب">إب</option>
-                            <option value="المكلا">المكلا</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>الحرف الأول للشعار</label>
-                    <input type="text" id="companyLogo" class="form-input" required maxlength="1" placeholder="حرف واحد">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-save"></i> حفظ الشركة
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- مودال تفاصيل المتقدم -->
-    <div class="modal-overlay" id="applicantDetailModal">
-        <div class="modal admin-modal">
-            <button class="modal-close" onclick="closeModal('applicantDetailModal')">&times;</button>
-            <div id="applicantDetailContent"></div>
+        
+        <div class="admin-login-bg-text">
+            <h2>شغلي</h2>
+            <p>أكبر منصة توظيف في اليمن</p>
         </div>
     </div>
 
