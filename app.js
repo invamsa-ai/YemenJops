@@ -286,16 +286,42 @@ function viewJobDetail(jobId) {
     document.getElementById('jobDetailModal').classList.add('active');
 }
 
-function applyForJob(jobId) {
+async function applyForJob(jobId) {
     const job = allJobs.find(j => String(j.id) === String(jobId));
+    
     if (!currentUser) {
         showToast('يرجى تسجيل الدخول أولاً للتقديم على الوظيفة', 'error');
         closeModal('jobDetailModal');
         setTimeout(() => openModal('loginModal'), 400);
         return;
     }
-    showToast(`تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح! 🎉`, 'success');
-    closeModal('jobDetailModal');
+    
+    if (!window.firebaseReady || !window.db) {
+        showToast('خدمة التقديم غير متاحة حالياً، حاول لاحقاً', 'error');
+        return;
+    }
+    
+    try {
+        // حفظ الطلب في Firebase
+        await addDoc(collection(window.db, 'applicants'), {
+            userId: currentUser.uid,
+            userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم',
+            userEmail: currentUser.email,
+            jobId: String(jobId),
+            jobTitle: job?.title || '',
+            jobCompany: job?.company || '',
+            jobCity: job?.city || '',
+            status: 'جديد',
+            appliedAt: serverTimestamp(),
+            createdAt: serverTimestamp()
+        });
+        
+        showToast(`تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح! 🎉`, 'success');
+        closeModal('jobDetailModal');
+    } catch (error) {
+        console.error('خطأ في تقديم الطلب:', error);
+        showToast('فشل تقديم الطلب، حاول مرة أخرى', 'error');
+    }
 }
 
 function toggleSaveJob(jobId) {
