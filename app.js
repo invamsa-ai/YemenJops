@@ -354,46 +354,54 @@ async function applyForJob(jobId) {
             }
         }
         
-        // رفع السيرة الذاتية (حتى 10 ميجابايت)
+        // رفع السيرة الذاتية (حتى 100 ميجابايت)
         let cvUrl = '';
         let cvFileName = '';
         const cvFileInput = document.getElementById('cvFile');
         
         if (cvFileInput && cvFileInput.files.length > 0) {
             const file = cvFileInput.files[0];
-            const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+            const MAX_SIZE = 100 * 1024 * 1024; // 100MB
             
             if (file.size > MAX_SIZE) {
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                throw new Error(`حجم الملف كبير جداً (${sizeMB} ميجابايت). الحد الأقصى 10 ميجابايت`);
+                throw new Error(`حجم الملف كبير جداً (${sizeMB} ميجابايت). الحد الأقصى 100 ميجابايت`);
             }
             
-            showToast('⏳ جاري معالجة السيرة الذاتية...', '');
+            showToast('⏳ جاري رفع السيرة الذاتية...', '');
             
             if (window.storage && firebaseReady) {
-                try {
-                    const storageRef = ref(window.storage, `cvs/${currentUser.uid}_${Date.now()}_${file.name}`);
-                    const uploadTask = uploadBytesResumable(storageRef, file);
-                    
-                    await new Promise((resolve, reject) => {
-                        uploadTask.on('state_changed',
-                            (snapshot) => {
-                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                showToast(`⏳ جاري رفع السيرة الذاتية... ${Math.round(progress)}%`, '');
-                            },
-                            (error) => { reject(error); },
-                            async () => {
-                                cvUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                                resolve();
-                            }
-                        );
-                    });
-                } catch (storageError) {
-                    console.warn('Storage غير متاح، استخدام Base64');
-                    cvUrl = await convertFileToBase64(file);
-                }
+                const storageRef = ref(window.storage, `cvs/${currentUser.uid}_${Date.now()}_${file.name}`);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+                
+                await new Promise((resolve, reject) => {
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            const sizeDone = (snapshot.bytesTransferred / (1024 * 1024)).toFixed(1);
+                            const sizeTotal = (snapshot.totalBytes / (1024 * 1024)).toFixed(1);
+                            showToast(`⏳ جاري رفع السيرة الذاتية... ${Math.round(progress)}% (${sizeDone}/${sizeTotal} MB)`, '');
+                        },
+                        (error) => {
+                            reject(error);
+                        },
+                        async () => {
+                            cvUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                            resolve();
+                        }
+                    );
+                });
             } else {
-                cvUrl = await convertFileToBase64(file);
+                // إذا Storage غير متاح، نخزن Base64 للملفات الصغيرة فقط
+                if (file.size > 1 * 1024 * 1024) {
+                    throw new Error('خدمة التخزين غير متاحة للملفات الكبيرة. يرجى ترقية الخطة أو تصغير الملف');
+                }
+                cvUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
             }
             
             cvFileName = file.name;
@@ -401,7 +409,7 @@ async function applyForJob(jobId) {
         
         showToast('⏳ جاري حفظ طلبك...', '');
         
-        const applicantData = {
+        await addDoc(collection(window.db, 'applicants'), {
             userId: currentUser.uid,
             name: userName,
             email: userEmail,
@@ -410,15 +418,13 @@ async function applyForJob(jobId) {
             jobTitle: job?.title || '',
             jobCompany: job?.company || '',
             jobCity: job?.city || '',
-            cvFileName: cvFileName,
             cvUrl: cvUrl,
-            cvBase64: cvUrl && cvUrl.startsWith('data:') ? cvUrl : '',
+            cvFileName: cvFileName,
             status: 'جديد',
             appliedAt: serverTimestamp(),
             createdAt: serverTimestamp()
-        };
+        });
         
-        await addDoc(collection(window.db, 'applicants'), applicantData);
         showToast(`✅ تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح! 🎉`, 'success');
         
         if (applyBtn) {
@@ -443,16 +449,6 @@ async function applyForJob(jobId) {
             applyBtn.style.background = '';
         }
     }
-}
-
-// دوال مساعدة
-function convertFileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
 }
 
 function toggleSaveJob(jobId) {
