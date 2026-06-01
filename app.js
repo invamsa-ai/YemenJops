@@ -3,7 +3,8 @@
 // ============================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAyWmacChzw5Wl-D_YkEObJw74qliw8OQs",
@@ -15,13 +16,14 @@ const firebaseConfig = {
     measurementId: "G-SW6K435LB1"
 };
 
-let app, auth, db;
+let app, auth, db, storage;
 let firebaseReady = false;
 
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+    storage = getStorage(app);
     firebaseReady = true;
     console.log("✅ Firebase متصل بنجاح");
 } catch (error) {
@@ -32,6 +34,7 @@ try {
 window.firebaseReady = firebaseReady;
 window.auth = auth;
 window.db = db;
+window.storage = storage;
 window.firebaseApp = app;
 
 // ============================================
@@ -152,7 +155,6 @@ function renderJobs(jobsToRender) {
         const jobIdStr = String(job.id);
         const isSaved = savedJobs.includes(jobIdStr);
         
-        // تنسيق تاريخ النشر
         let postedDate = 'حديث';
         if (job.postedAt) {
             if (job.postedAt.seconds) {
@@ -198,7 +200,6 @@ function renderEmployers() {
     const grid = document.getElementById('employersGrid');
     if (!grid) return;
     
-    // تجميع الشركات من الوظائف
     const employersMap = {};
     allJobs.forEach(job => {
         if (!employersMap[job.company]) {
@@ -270,9 +271,24 @@ function viewJobDetail(jobId) {
                     <p style="margin-top:6px;color:var(--text-medium);">${job.description || 'يرجى التواصل مع جهة العمل لمزيد من التفاصيل.'}</p>
                 </div>
                 ${job.tags?.length ? `<div class="job-tags" style="margin-bottom:14px;">${job.tags.map(t => `<span class="job-tag">${t}</span>`).join('')}</div>` : ''}
-                <button class="btn btn-primary btn-block btn-lg" onclick="applyForJob('${jobIdStr}')">
-                    <i class="fas fa-paper-plane"></i> تقديم طلب التوظيف
-                </button>
+                
+                <div id="applicationForm" style="display:${currentUser ? 'block' : 'none'};">
+                    <div class="form-group">
+                        <label><i class="fas fa-file-pdf"></i> رفع السيرة الذاتية (PDF, DOC, DOCX)</label>
+                        <input type="file" id="cvFile" accept=".pdf,.doc,.docx" class="form-input" style="padding:8px;">
+                        <small style="color:var(--text-muted);">الحد الأقصى: 5 ميجابايت</small>
+                    </div>
+                    <button class="btn btn-primary btn-block btn-lg" onclick="applyForJob('${jobIdStr}')" id="applyBtn">
+                        <i class="fas fa-paper-plane"></i> تقديم طلب التوظيف
+                    </button>
+                </div>
+                <div id="loginPrompt" style="display:${currentUser ? 'none' : 'block'};text-align:center;">
+                    <p style="margin-bottom:10px;color:var(--text-light);">يجب تسجيل الدخول للتقديم على الوظيفة</p>
+                    <button class="btn btn-primary" onclick="closeModal('jobDetailModal');setTimeout(()=>openModal('loginModal'),300);">
+                        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    </button>
+                </div>
+                
                 <button class="btn btn-outline btn-block" style="margin-top:8px;" onclick="toggleSaveJob('${jobIdStr}');closeModal('jobDetailModal');">
                     <i class="fas fa-bookmark"></i> ${isSaved ? 'محفوظة' : 'حفظ الوظيفة'}
                 </button>
@@ -286,6 +302,9 @@ function viewJobDetail(jobId) {
     document.getElementById('jobDetailModal').classList.add('active');
 }
 
+// ============================================
+// APPLY FOR JOB WITH LOADING & CV UPLOAD
+// ============================================
 async function applyForJob(jobId) {
     const job = allJobs.find(j => String(j.id) === String(jobId));
     
@@ -301,26 +320,133 @@ async function applyForJob(jobId) {
         return;
     }
     
+    const applyBtn = document.getElementById('applyBtn');
+    const originalBtnText = applyBtn ? applyBtn.innerHTML : '';
+    
+    // تفعيل حالة التحميل
+    if (applyBtn) {
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التقديم...';
+        applyBtn.style.opacity = '0.7';
+        applyBtn.style.cursor = 'not-allowed';
+    }
+    
+    showToast('⏳ جاري تجهيز طلبك...', '');
+    
     try {
+        // الحصول على بيانات المستخدم من Firestore
+        let userName = 'مستخدم';
+        let userEmail = currentUser.email || '';
+        let userPhone = '';
+        
+        if (window.db) {
+            const usersRef = collection(window.db, 'users');
+            const q = query(usersRef, where('uid', '==', currentUser.uid), limit(1));
+            const snapshot = await getDocs(q);
+            
+            if (!snapshot.empty) {
+                const userData = snapshot.docs[0].data();
+                userName = userData.name || currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم';
+                userEmail = userData.email || currentUser.email || '';
+                userPhone = userData.phone || '';
+            } else {
+                userName = currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم';
+            }
+        }
+        
+        // رفع السيرة الذاتية إذا وجدت
+        let cvUrl = '';
+        const cvFileInput = document.getElementById('cvFile');
+        
+        if (cvFileInput && cvFileInput.files.length > 0) {
+            const file = cvFileInput.files[0];
+            
+            if (file.size > 5 * 1024 * 1024) {
+                throw new Error('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت');
+            }
+            
+            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!allowedTypes.includes(file.type)) {
+                throw new Error('نوع الملف غير مدعوم. يرجى رفع PDF أو DOC أو DOCX');
+            }
+            
+            if (window.storage) {
+                showToast('⏳ جاري رفع السيرة الذاتية...', '');
+                
+                const storageRef = ref(window.storage, `cvs/${currentUser.uid}_${Date.now()}_${file.name}`);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+                
+                await new Promise((resolve, reject) => {
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            showToast(`⏳ جاري رفع السيرة الذاتية... ${Math.round(progress)}%`, '');
+                        },
+                        (error) => {
+                            reject(error);
+                        },
+                        async () => {
+                            cvUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                            resolve();
+                        }
+                    );
+                });
+            }
+        }
+        
         // حفظ الطلب في Firebase
+        showToast('⏳ جاري حفظ طلبك...', '');
+        
         await addDoc(collection(window.db, 'applicants'), {
             userId: currentUser.uid,
-            userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم',
-            userEmail: currentUser.email,
+            name: userName,
+            email: userEmail,
+            phone: userPhone,
             jobId: String(jobId),
             jobTitle: job?.title || '',
             jobCompany: job?.company || '',
             jobCity: job?.city || '',
+            cvUrl: cvUrl,
             status: 'جديد',
             appliedAt: serverTimestamp(),
             createdAt: serverTimestamp()
         });
         
-        showToast(`تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح! 🎉`, 'success');
-        closeModal('jobDetailModal');
+        showToast(`✅ تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح! 🎉`, 'success');
+        
+        if (applyBtn) {
+            applyBtn.innerHTML = '<i class="fas fa-check"></i> تم التقديم بنجاح';
+            applyBtn.style.background = '#10b981';
+            applyBtn.style.opacity = '1';
+            applyBtn.style.cursor = 'default';
+            applyBtn.disabled = true;
+        }
+        
+        setTimeout(() => {
+            closeModal('jobDetailModal');
+        }, 2000);
+        
     } catch (error) {
         console.error('خطأ في تقديم الطلب:', error);
-        showToast('فشل تقديم الطلب، حاول مرة أخرى', 'error');
+        
+        let errorMessage = 'فشل تقديم الطلب، حاول مرة أخرى';
+        if (error.message.includes('كبير جداً')) {
+            errorMessage = 'حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت';
+        } else if (error.message.includes('غير مدعوم')) {
+            errorMessage = 'نوع الملف غير مدعوم. يرجى رفع PDF أو DOC أو DOCX';
+        } else if (error.code === 'storage/unauthorized') {
+            errorMessage = 'غير مصرح برفع الملفات. تأكد من صلاحيات Storage';
+        }
+        
+        showToast('❌ ' + errorMessage, 'error');
+        
+        if (applyBtn) {
+            applyBtn.disabled = false;
+            applyBtn.innerHTML = originalBtnText;
+            applyBtn.style.opacity = '1';
+            applyBtn.style.cursor = 'pointer';
+            applyBtn.style.background = '';
+        }
     }
 }
 
@@ -471,6 +597,7 @@ async function handleRegister(event) {
     const password = document.getElementById('regPassword')?.value;
     const city = document.getElementById('regCity')?.value;
     const role = document.getElementById('regRole')?.value;
+    const phone = document.getElementById('regPhone')?.value || '';
 
     if (!name || !email || !password) {
         showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
@@ -490,6 +617,7 @@ async function handleRegister(event) {
                     uid: userCredential.user.uid,
                     name,
                     email,
+                    phone,
                     city,
                     role,
                     createdAt: serverTimestamp()
@@ -572,7 +700,7 @@ function showToast(message, type = '') {
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {
         toast.classList.remove('show');
-    }, 3000);
+    }, 4000);
 }
 
 // ============================================
@@ -635,7 +763,6 @@ function setupKeyboardShortcuts() {
 // INITIALIZATION
 // ============================================
 async function init() {
-    // جلب الوظائف من Firebase فقط
     allJobs = await fetchJobsFromFirebase();
     filteredJobs = [...allJobs];
 
@@ -666,7 +793,6 @@ async function init() {
     console.log('🔥 Firebase:', window.firebaseReady ? 'متصل' : 'غير متصل');
 }
 
-// بدء التشغيل عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', init);
 
 // ============================================
