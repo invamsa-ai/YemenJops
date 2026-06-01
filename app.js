@@ -305,6 +305,7 @@ function viewJobDetail(jobId) {
 // ============================================
 // APPLY FOR JOB WITH LOADING & CV UPLOAD
 // ============================================
+// استبدل دالة applyForJob بهذا الكود
 async function applyForJob(jobId) {
     const job = allJobs.find(j => String(j.id) === String(jobId));
     
@@ -316,14 +317,13 @@ async function applyForJob(jobId) {
     }
     
     if (!window.firebaseReady || !window.db) {
-        showToast('خدمة التقديم غير متاحة حالياً، حاول لاحقاً', 'error');
+        showToast('خدمة التقديم غير متاحة حالياً', 'error');
         return;
     }
     
     const applyBtn = document.getElementById('applyBtn');
     const originalBtnText = applyBtn ? applyBtn.innerHTML : '';
     
-    // تفعيل حالة التحميل
     if (applyBtn) {
         applyBtn.disabled = true;
         applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التقديم...';
@@ -334,7 +334,6 @@ async function applyForJob(jobId) {
     showToast('⏳ جاري تجهيز طلبك...', '');
     
     try {
-        // الحصول على بيانات المستخدم من Firestore
         let userName = 'مستخدم';
         let userEmail = currentUser.email || '';
         let userPhone = '';
@@ -346,55 +345,37 @@ async function applyForJob(jobId) {
             
             if (!snapshot.empty) {
                 const userData = snapshot.docs[0].data();
-                userName = userData.name || currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم';
+                userName = userData.name || currentUser.displayName || 'مستخدم';
                 userEmail = userData.email || currentUser.email || '';
                 userPhone = userData.phone || '';
-            } else {
-                userName = currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم';
             }
         }
         
-        // رفع السيرة الذاتية إذا وجدت
-        let cvUrl = '';
+        // تحويل السيرة الذاتية إلى Base64 (للخطة المجانية)
+        let cvBase64 = '';
+        let cvFileName = '';
         const cvFileInput = document.getElementById('cvFile');
         
         if (cvFileInput && cvFileInput.files.length > 0) {
             const file = cvFileInput.files[0];
             
-            if (file.size > 5 * 1024 * 1024) {
-                throw new Error('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت');
+            // حد 500KB للخطة المجانية
+            if (file.size > 500 * 1024) {
+                throw new Error('حجم الملف كبير جداً. الحد الأقصى 500 كيلوبايت للخطة المجانية');
             }
             
-            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            if (!allowedTypes.includes(file.type)) {
-                throw new Error('نوع الملف غير مدعوم. يرجى رفع PDF أو DOC أو DOCX');
-            }
+            showToast('⏳ جاري معالجة السيرة الذاتية...', '');
             
-            if (window.storage) {
-                showToast('⏳ جاري رفع السيرة الذاتية...', '');
-                
-                const storageRef = ref(window.storage, `cvs/${currentUser.uid}_${Date.now()}_${file.name}`);
-                const uploadTask = uploadBytesResumable(storageRef, file);
-                
-                await new Promise((resolve, reject) => {
-                    uploadTask.on('state_changed',
-                        (snapshot) => {
-                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            showToast(`⏳ جاري رفع السيرة الذاتية... ${Math.round(progress)}%`, '');
-                        },
-                        (error) => {
-                            reject(error);
-                        },
-                        async () => {
-                            cvUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                            resolve();
-                        }
-                    );
-                });
-            }
+            // تحويل الملف إلى Base64
+            cvBase64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            cvFileName = file.name;
         }
         
-        // حفظ الطلب في Firebase
         showToast('⏳ جاري حفظ طلبك...', '');
         
         await addDoc(collection(window.db, 'applicants'), {
@@ -406,7 +387,8 @@ async function applyForJob(jobId) {
             jobTitle: job?.title || '',
             jobCompany: job?.company || '',
             jobCity: job?.city || '',
-            cvUrl: cvUrl,
+            cvBase64: cvBase64,
+            cvFileName: cvFileName,
             status: 'جديد',
             appliedAt: serverTimestamp(),
             createdAt: serverTimestamp()
@@ -422,30 +404,17 @@ async function applyForJob(jobId) {
             applyBtn.disabled = true;
         }
         
-        setTimeout(() => {
-            closeModal('jobDetailModal');
-        }, 2000);
+        setTimeout(() => closeModal('jobDetailModal'), 2000);
         
     } catch (error) {
-        console.error('خطأ في تقديم الطلب:', error);
-        
-        let errorMessage = 'فشل تقديم الطلب، حاول مرة أخرى';
-        if (error.message.includes('كبير جداً')) {
-            errorMessage = 'حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت';
-        } else if (error.message.includes('غير مدعوم')) {
-            errorMessage = 'نوع الملف غير مدعوم. يرجى رفع PDF أو DOC أو DOCX';
-        } else if (error.code === 'storage/unauthorized') {
-            errorMessage = 'غير مصرح برفع الملفات. تأكد من صلاحيات Storage';
-        }
-        
-        showToast('❌ ' + errorMessage, 'error');
+        console.error('خطأ:', error);
+        showToast('❌ ' + (error.message || 'فشل التقديم'), 'error');
         
         if (applyBtn) {
             applyBtn.disabled = false;
             applyBtn.innerHTML = originalBtnText;
             applyBtn.style.opacity = '1';
             applyBtn.style.cursor = 'pointer';
-            applyBtn.style.background = '';
         }
     }
 }
