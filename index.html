@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شغلي - موقع التوظيف الأول في اليمن | وظائف في صنعاء، عدن، تعز وكافة المحافظات</title>
+    <meta name="description" content="شغلي هو أكبر موقع توظيف في اليمن. ابحث عن وظائف في صنعاء، عدن، تعز، الحديدة، إب، المكلا وجميع المدن اليمنية. وظائف في تكنولوجيا المعلومات، الهندسة، التعليم، الصحة، المحاسبة، التسويق والمزيد.">
+    <meta name="keywords" content="وظائف اليمن, توظيف في اليمن, وظائف صنعاء, وظائف عدن, وظائف تعز, شغل في اليمن, فرص عمل اليمن, موقع توظيف يمني">
+
+    <!-- Google Fonts - Tajawal for Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #0d6b4f;
+            --primary-dark: #084d38;
+            --primary-light: #e8f5f0;
+            --secondary: #f4a024;
+            --secondary-dark: #d4891a;
+            --accent: #1a8a6a;
+            --text-dark: #1a1a2e;
+            --text-medium: #444;
+            --text-light: #6b7280;
+            --text-muted: #9ca3af;
+            --bg-light: #f8fafb;
+            --bg-white: #ffffff;
+            --bg-gray: #f3f4f6;
+            --border: #e5e7eb;
+            --border-light: #f0f0f0;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.16);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-family: 'Tajawal', 'Segoe UI', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ============ HEADER / NAVBAR ============ */
+        .navbar {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .navbar.scrolled {
+            box-shadow: var(--shadow-lg);
+        }
+        .navbar-inner {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 68px;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        .navbar-brand .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--primary);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.3rem;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            list-style: none;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-medium);
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            text-decoration: none;
+            font-family: var(--font-family);
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: var(--secondary);
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+        .btn-lg {
+            padding: 14px 28px;
+            font-size: 1rem;
+            border-radius: var(--radius);
+        }
+        .btn-sm {
+            padding: 7px 14px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Mobile menu toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-dark);
+            padding: 8px;
+        }
+
+        /* ============ HERO SECTION ============ */
+        .hero {
+            background: linear-gradient(160deg, #e8f5f0 0%, #d4ede3 30%, #f0f7f4 60%, #eaf6f1 100%);
+            padding: 50px 24px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -120px;
+            right: -120px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(13, 107, 79, 0.07) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(244, 160, 36, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+            line-height: 1.3;
+        }
+        .hero h1 .highlight {
+            color: var(--primary);
+            position: relative;
+        }
+        .hero h1 .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: rgba(244, 160, 36, 0.4);
+            border-radius: 4px;
+            z-index: -1;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-medium);
+            margin-bottom: 32px;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 36px;
+        }
+        .hero-stat {
+            text-align: center;
+        }
+        .hero-stat .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--primary);
+            display: block;
+        }
+        .hero-stat .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* ============ SEARCH BAR ============ */
+        .search-container {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 8px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 800px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+        .search-container .search-group {
+            flex: 1;
+            min-width: 160px;
+            position: relative;
+        }
+        .search-container .search-group i {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+        .search-container input,
+        .search-container select {
+            width: 100%;
+            padding: 14px 42px 14px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: var(--font-family);
+            background: var(--bg-light);
+            transition: var(--transition);
+            color: var(--text-dark);
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .search-container input:focus,
+        .search-container select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 107, 79, 0.08);
+            background: #fff;
+        }
+        .search-container .search-group.select-group i {
+            right: 14px;
+        }
+        .search-container .btn-search {
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: var(--radius-sm);
+            background: var(--secondary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-family);
+            white-space: nowrap;
+        }
+        .search-container .btn-search:hover {
+            background: var(--secondary-dark);
+            box-shadow: var(--shadow);
+        }
+
+        /* ============ MAIN CONTENT AREA ============ */
+        .main-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Section Titles */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            position: relative;
+            padding-right: 16px;
+        }
+        .section-title::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        .section-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .section-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* ============ CATEGORY GRID ============ */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 14px;
+            margin-bottom: 48px;
+        }
+        .category-card {
+            background: var(--bg-white);
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 20px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+        .category-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+            background: var(--primary-light);
+        }
+        .category-card .cat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.4rem;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+        .category-card:hover .cat-icon {
+            background: var(--primary);
+            color: #fff;
+        }
+        .category-card .cat-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+        .category-card .cat-count {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ============ JOB LISTINGS ============ */
+        .jobs-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        .filter-sidebar {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 88px;
+        }
+        .filter-sidebar h3 {
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+        .filter-group {
+            margin-bottom: 18px;
+        }
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.88rem;
+            color: var(--text-medium);
+        }
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background: var(--bg-light);
+        }
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 107, 79, 0.06);
+        }
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+        .filter-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+        .jobs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .job-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+        .job-card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .job-card.featured {
+            border-right: 4px solid var(--secondary);
+        }
+        .job-card .job-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+        .job-card .company-logo {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-sm);
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .job-card .job-info h3 {
+            font-size: 1.08rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: var(--text-dark);
+        }
+        .job-card .job-info .company-name {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .job-card .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.84rem;
+            color: var(--text-medium);
+        }
+        .job-card .job-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--bg-gray);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .job-card .job-meta span i {
+            color: var(--primary);
+            font-size: 0.75rem;
+        }
+        .job-card .job-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .job-card .job-tag {
+            font-size: 0.78rem;
+            padding: 4px 10px;
+            border-radius: 14px;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .job-card .job-tag.urgent {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .job-card .job-actions {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 6px;
+        }
+        .job-card .btn-bookmark {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+            padding: 4px;
+        }
+        .job-card .btn-bookmark:hover,
+        .job-card .btn-bookmark.saved {
+            color: var(--secondary);
+        }
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .no-results i {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 12px;
+            color: #d1d5db;
+        }
+
+        /* ============ EMPLOYERS SECTION ============ */
+        .employers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+        .employer-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 16px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+        .employer-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+        .employer-card .emp-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius);
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        .employer-card h4 {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .employer-card .emp-jobs {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+        }
+
+        /* ============ HOW IT WORKS ============ */
+        .steps-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+        .step-card {
+            text-align: center;
+            padding: 28px 18px;
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .step-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            font-weight: 900;
+            font-size: 1.3rem;
+        }
+        .step-card h4 {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .step-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            background: #1a1a2e;
+            color: #d1d5db;
+            padding: 48px 24px 24px;
+        }
+        .footer-inner {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+        }
+        .footer-col h4 {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 14px;
+            font-size: 1.05rem;
+        }
+        .footer-col ul {
+            list-style: none;
+        }
+        .footer-col ul li {
+            margin-bottom: 8px;
+        }
+        .footer-col ul li a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .footer-col ul li a:hover {
+            color: #fff;
+        }
+        .footer-bottom {
+            text-align: center;
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 1px solid #374151;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        /* ============ MODALS ============ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal {
+            background: var(--bg-white);
+            border-radius: var(--radius-xl);
+            padding: 32px 28px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            box-shadow: var(--shadow-xl);
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 6px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        .modal-close:hover {
+            background: var(--bg-gray);
+            color: var(--text-dark);
+        }
+        .modal h2 {
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.4rem;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-family);
+            font-size: 0.92rem;
+            transition: var(--transition);
+            background: var(--bg-light);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 107, 79, 0.06);
+        }
+        .modal-footer-text {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        .modal-footer-text a {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .modal-footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* ============ TOAST ============ */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.success {
+            background: var(--primary);
+        }
+        .toast.error {
+            background: #dc2626;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1024px) {
+            .jobs-layout {
+                grid-template-columns: 1fr;
+            }
+            .filter-sidebar {
+                position: static;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                padding: 14px;
+            }
+            .filter-sidebar .filter-group {
+                flex: 1;
+                min-width: 140px;
+                margin-bottom: 0;
+            }
+            .filter-sidebar h3 {
+                width: 100%;
+                margin-bottom: 4px;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+            .steps-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 68px;
+                right: 0;
+                left: 0;
+                background: #fff;
+                flex-direction: column;
+                padding: 16px;
+                border-bottom: 2px solid var(--border);
+                box-shadow: var(--shadow-lg);
+                z-index: 999;
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            .search-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .search-container .search-group {
+                width: 100%;
+            }
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            .hero p {
+                font-size: 0.95rem;
+            }
+            .hero-stats {
+                gap: 20px;
+            }
+            .hero-stat .stat-number {
+                font-size: 1.4rem;
+            }
+            .categories-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 8px;
+            }
+            .category-card {
+                padding: 14px 8px;
+            }
+            .category-card .cat-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+            }
+            .category-card .cat-name {
+                font-size: 0.78rem;
+            }
+            .employers-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .job-card .job-actions {
+                position: static;
+                margin-top: 8px;
+            }
+            .footer-inner {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            .navbar-inner {
+                padding: 0 12px;
+                height: 56px;
+            }
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            .navbar-brand .brand-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+            .btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            .hero {
+                padding: 30px 12px 40px;
+            }
+            .hero h1 {
+                font-size: 1.4rem;
+            }
+            .main-content {
+                padding: 20px 12px;
+            }
+            .section-title {
+                font-size: 1.2rem;
+            }
+            .footer-inner {
+                grid-template-columns: 1fr;
+            }
+            .modal {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ NAVBAR ============ -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="#" class="navbar-brand" title="شغلي - الرئيسية">
+                <span class="brand-icon"><i class="fas fa-briefcase"></i></span>
+                شغلي
+            </a>
+            <button class="menu-toggle" id="menuToggle" aria-label="القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" class="active" data-nav="home">الرئيسية</a></li>
+                <li><a href="#jobs-section" data-nav="jobs">تصفح الوظائف</a></li>
+                <li><a href="#employers-section" data-nav="employers">أصحاب العمل</a></li>
+                <li><a href="#categories-section" data-nav="categories">التخصصات</a></li>
+                <li><a href="#" onclick="openModal('aboutModal')">عن شغلي</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">
+                    <i class="fas fa-sign-in-alt"></i> دخول
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">
+                    <i class="fas fa-user-plus"></i> تسجيل
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============ HERO SECTION ============ -->
+    <section class="hero">
+        <div class="hero-inner">
+            <h1>أكبر موقع توظيف في <span class="highlight">اليمن</span></h1>
+            <p>اكتشف آلاف الفرص الوظيفية في صنعاء، عدن، تعز، الحديدة، إب، المكلا وجميع المحافظات اليمنية. اربط بين الكفاءات اليمنية وأفضل جهات العمل.</p>
+
+            <!-- Search Bar -->
+            <div class="search-container" id="heroSearch">
+                <div class="search-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchKeyword" placeholder="المسمى الوظيفي أو المهارات...">
+                </div>
+                <div class="search-group select-group">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <select id="searchCity">
+                        <option value="">كل المدن</option>
+                        <option value="صنعاء">صنعاء</option>
+                        <option value="عدن">عدن</option>
+                        <option value="تعز">تعز</option>
+                        <option value="الحديدة">الحديدة</option>
+                        <option value="إب">إب</option>
+                        <option value="المكلا">المكلا</option>
+                        <option value="سيئون">سيئون</option>
+                        <option value="ذمار">ذمار</option>
+                        <option value="عمران">عمران</option>
+                        <option value="مأرب">مأرب</option>
+                        <option value="الغيظة">الغيظة</option>
+                        <option value="زبيد">زبيد</option>
+                        <option value="بيحان">بيحان</option>
+                    </select>
+                </div>
+                <div class="search-group select-group">
+                    <i class="fas fa-tag"></i>
+                    <select id="searchCategory">
+                        <option value="">كل التخصصات</option>
+                        <option value="تكنولوجيا المعلومات">تكنولوجيا المعلومات</option>
+                        <option value="الهندسة">الهندسة</option>
+                        <option value="التعليم">التعليم</option>
+                        <option value="الرعاية الصحية">الرعاية الصحية</option>
+                        <option value="المحاسبة والمالية">المحاسبة والمالية</option>
+                        <option value="التسويق والمبيعات">التسويق والمبيعات</option>
+                        <option value="الإدارة">الإدارة</option>
+                        <option value="الخدمات اللوجستية">الخدمات اللوجستية</option>
+                        <option value="البناء والتشييد">البناء والتشييد</option>
+                        <option value="الزراعة">الزراعة</option>
+                        <option value="المنظمات غير الحكومية">المنظمات غير الحكومية</option>
+                        <option value="النفط والغاز">النفط والغاز</option>
+                        <option value="الاتصالات">الاتصالات</option>
+                        <option value="البنوك">البنوك</option>
+                    </select>
+                </div>
+                <button class="btn-search" onclick="searchJobs()">
+                    <i class="fas fa-search"></i> بحث
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="stat-number" id="statJobs">1,250+</span>
+                    <span class="stat-label">وظيفة متاحة</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number">480+</span>
+                    <span class="stat-label">جهة عمل</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number">35,000+</span>
+                    <span class="stat-label">باحث عن عمل</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <div class="main-content">
+
+        <!-- Categories Section -->
+        <div id="categories-section">
+            <div class="section-header">
+                <h2 class="section-title">التخصصات الأكثر طلباً</h2>
+                <a href="#" class="section-link" onclick="document.getElementById('searchCategory').focus(); return false;">
+                    عرض الكل <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <div class="categories-grid" id="categoriesGrid">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Jobs Section with Sidebar -->
+        <div id="jobs-section">
+            <div class="section-header">
+                <h2 class="section-title">أحدث الوظائف</h2>
+                <span style="font-size:0.9rem;color:var(--text-muted);" id="resultCount"></span>
+            </div>
+            <div class="jobs-layout">
+                <!-- Filter Sidebar -->
+                <aside class="filter-sidebar" id="filterSidebar">
+                    <h3><i class="fas fa-sliders-h"></i> تصفية النتائج</h3>
+                    <div class="filter-group">
+                        <label>المدينة</label>
+                        <select id="filterCity" onchange="applyFilters()">
+                            <option value="">كل المدن</option>
+                            <option value="صنعاء">صنعاء</option>
+                            <option value="عدن">عدن</option>
+                            <option value="تعز">تعز</option>
+                            <option value="الحديدة">الحديدة</option>
+                            <option value="إب">إب</option>
+                            <option value="المكلا">المكلا</option>
+                            <option value="سيئون">سيئون</option>
+                            <option value="ذمار">ذمار</option>
+                            <option value="عمران">عمران</option>
+                            <option value="مأرب">مأرب</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>التخصص</label>
+                        <select id="filterCategory" onchange="applyFilters()">
+                            <option value="">كل التخصصات</option>
+                            <option value="تكنولوجيا المعلومات">تكنولوجيا المعلومات</option>
+                            <option value="الهندسة">الهندسة</option>
+                            <option value="التعليم">التعليم</option>
+                            <option value="الرعاية الصحية">الرعاية الصحية</option>
+                            <option value="المحاسبة والمالية">المحاسبة والمالية</option>
+                            <option value="التسويق والمبيعات">التسويق والمبيعات</option>
+                            <option value="الإدارة">الإدارة</option>
+                            <option value="الخدمات اللوجستية">الخدمات اللوجستية</option>
+                            <option value="البناء والتشييد">البناء والتشييد</option>
+                            <option value="المنظمات غير الحكومية">المنظمات غير الحكومية</option>
+                            <option value="النفط والغاز">النفط والغاز</option>
+                            <option value="الاتصالات">الاتصالات</option>
+                            <option value="البنوك">البنوك</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>نوع الوظيفة</label>
+                        <select id="filterJobType" onchange="applyFilters()">
+                            <option value="">كل الأنواع</option>
+                            <option value="دوام كامل">دوام كامل</option>
+                            <option value="دوام جزئي">دوام جزئي</option>
+                            <option value="عن بعد">عن بعد</option>
+                            <option value="مشروع مؤقت">مشروع مؤقت</option>
+                            <option value="تدريب">تدريب</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>الحد الأدنى للراتب (ريال يمني)</label>
+                        <input type="number" id="filterMinSalary" placeholder="مثال: 150000" onchange="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-checkbox">
+                            <input type="checkbox" id="filterFeatured" onchange="applyFilters()">
+                            الوظائف المميزة فقط
+                        </label>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-block" onclick="resetFilters()">
+                        <i class="fas fa-redo"></i> إعادة ضبط
+                    </button>
+                </aside>
+
+                <!-- Jobs List -->
+                <div class="jobs-list" id="jobsList">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Employers Section -->
+        <div id="employers-section">
+            <div class="section-header">
+                <h2 class="section-title">أفضل جهات العمل</h2>
+                <a href="#" class="section-link">عرض الكل <i class="fas fa-arrow-left"></i></a>
+            </div>
+            <div class="employers-grid" id="employersGrid">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div>
+            <div class="section-header">
+                <h2 class="section-title">كيف يعمل شغلي؟</h2>
+            </div>
+            <div class="steps-row">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4>أنشئ حسابك</h4>
+                    <p>سجل مجاناً كباحث عن عمل وأكمل ملفك الشخصي بالسيرة الذاتية والمهارات.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4>ابحث عن وظائف</h4>
+                    <p>استخدم محرك البحث المتقدم للعثور على الوظائف المناسبة في تخصصك ومدينتك.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4>قدّم وانطلق</h4>
+                    <p>قدّم طلبك للوظائف التي تناسبك وتواصل مباشرة مع جهات العمل الموثوقة.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <h4>شغلي - وظائف اليمن</h4>
+                <p style="font-size:0.9rem;">أكبر منصة توظيف يمنية تربط بين الباحثين عن عمل وأصحاب العمل في جميع أنحاء الجمهورية اليمنية.</p>
+            </div>
+            <div class="footer-col">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="#">الرئيسية</a></li>
+                    <li><a href="#jobs-section">تصفح الوظائف</a></li>
+                    <li><a href="#employers-section">أصحاب العمل</a></li>
+                    <li><a href="#" onclick="openModal('aboutModal')">عن شغلي</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>مدن رئيسية</h4>
+                <ul>
+                    <li><a href="#" onclick="searchByCity('صنعاء')">وظائف صنعاء</a></li>
+                    <li><a href="#" onclick="searchByCity('عدن')">وظائف عدن</a></li>
+                    <li><a href="#" onclick="searchByCity('تعز')">وظائف تعز</a></li>
+                    <li><a href="#" onclick="searchByCity('الحديدة')">وظائف الحديدة</a></li>
+                    <li><a href="#" onclick="searchByCity('المكلا')">وظائف المكلا</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>تواصل معنا</h4>
+                <ul>
+                    <li><a href="mailto:info@shaghalniye.com"><i class="fas fa-envelope"></i> info@shaghalniye.com</a></li>
+                    <li><a href="tel:+96712345678"><i class="fas fa-phone"></i> +967 1 234 5678</a></li>
+                    <li><span><i class="fas fa-map-marker-alt"></i> صنعاء، الجمهورية اليمنية</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 شغلي - جميع الحقوق محفوظة. موقع التوظيف الأول في اليمن.</p>
+        </div>
+    </footer>
+
+    <!-- ============ LOGIN MODAL ============ -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+            <h2><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" placeholder="أدخل بريدك الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> دخول
+                </button>
+            </form>
+            <p class="modal-footer-text">
+                ليس لديك حساب؟ <a onclick="switchModal('loginModal','registerModal')">سجل الآن</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ============ REGISTER MODAL ============ -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+            <h2><i class="fas fa-user-plus"></i> إنشاء حساب جديد</h2>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>الاسم الكامل</label>
+                    <input type="text" id="regName" placeholder="أدخل اسمك الكامل" required>
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="regEmail" placeholder="أدخل بريدك الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="regPassword" placeholder="اختر كلمة مرور قوية" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>المدينة</label>
+                    <select id="regCity">
+                        <option value="">اختر مدينتك</option>
+                        <option value="صنعاء">صنعاء</option>
+                        <option value="عدن">عدن</option>
+                        <option value="تعز">تعز</option>
+                        <option value="الحديدة">الحديدة</option>
+                        <option value="إب">إب</option>
+                        <option value="المكلا">المكلا</option>
+                        <option value="سيئون">سيئون</option>
+                        <option value="ذمار">ذمار</option>
+                        <option value="عمران">عمران</option>
+                        <option value="مأرب">مأرب</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>أنا:</label>
+                    <select id="regRole">
+                        <option value="باحث عن عمل">باحث عن عمل</option>
+                        <option value="صاحب عمل">صاحب عمل</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-user-plus"></i> إنشاء الحساب
+                </button>
+            </form>
+            <p class="modal-footer-text">
+                لديك حساب بالفعل؟ <a onclick="switchModal('registerModal','loginModal')">سجل دخول</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ============ ABOUT MODAL ============ -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('aboutModal')">&times;</button>
+            <h2>عن منصة شغلي</h2>
+            <p style="text-align:center;color:var(--text-medium);line-height:1.8;">
+                <strong>شغلي</strong> هي منصة التوظيف الرائدة في الجمهورية اليمنية، صُممت خصيصاً لتلبية احتياجات
+                سوق العمل اليمني. نربط بين الكفاءات اليمنية المتميزة وأفضل جهات العمل في مختلف القطاعات
+                بما فيها تكنولوجيا المعلومات، الهندسة، الصحة، التعليم، المنظمات غير الحكومية، النفط والغاز،
+                والاتصالات. تغطي منصتنا جميع المحافظات اليمنية من صنعاء وعدن وتعز والحديدة إلى المكلا وسيئون ومأرب.
+            </p>
+        </div>
+    </div>
+
+    <!-- ============ TOAST ============ -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ============ Firebase SDKs ============ -->
+    <script type="module">
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // استبدل هذه القيم بمشروع Firebase الخاص بك
+        // ============================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // تهيئة Firebase - استبدل بقيم مشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-PLACEHOLDER-KEY-REPLACE-WITH-YOURS",
+            authDomain: "shaghalni-ye.firebaseapp.com",
+            projectId: "shaghalni-ye",
+            storageBucket: "shaghalni-ye.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef"
+        };
+
+        let app, auth, db;
+        let firebaseReady = false;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            firebaseReady = true;
+            console.log("✅ Firebase متصل بنجاح");
+        } catch (error) {
+            console.warn("⚠️ Firebase غير متصل - استخدام البيانات المحلية:", error.message);
+            firebaseReady = false;
+        }
+
+        // تصدير للاستخدام في الكود الرئيسي
+        window.firebaseReady = firebaseReady;
+        window.auth = auth;
+        window.db = db;
+        window.firebaseApp = app;
+    </script>
+
+    <!-- ============ MAIN APPLICATION SCRIPT ============ -->
+    <script>
+        // ============================================
+        // البيانات اليمنية - وظائف تجريبية
+        // ============================================
+        const yemeniCities = [
+            'صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'المكلا', 'سيئون',
+            'ذمار', 'عمران', 'مأرب', 'الغيظة', 'زبيد', 'بيحان', 'لحج', 'أبين'
+        ];
+
+        const jobCategories = [
+            { name: 'تكنولوجيا المعلومات', icon: 'fa-laptop-code', color: '#0d6b4f' },
+            { name: 'الهندسة', icon: 'fa-hard-hat', color: '#2563eb' },
+            { name: 'التعليم', icon: 'fa-chalkboard-teacher', color: '#7c3aed' },
+            { name: 'الرعاية الصحية', icon: 'fa-stethoscope', color: '#dc2626' },
+            { name: 'المحاسبة والمالية', icon: 'fa-calculator', color: '#059669' },
+            { name: 'التسويق والمبيعات', icon: 'fa-bullhorn', color: '#f4a024' },
+            { name: 'الإدارة', icon: 'fa-user-tie', color: '#4f46e5' },
+            { name: 'الخدمات اللوجستية', icon: 'fa-truck-fast', color: '#0891b2' },
+            { name: 'البناء والتشييد', icon: 'fa-building', color: '#b45309' },
+            { name: 'المنظمات غير الحكومية', icon: 'fa-hand-holding-heart', color: '#be123c' },
+            { name: 'النفط والغاز', icon: 'fa-oil-can', color: '#1e40af' },
+            { name: 'الاتصالات', icon: 'fa-satellite-dish', color: '#0e7490' },
+            { name: 'البنوك', icon: 'fa-landmark', color: '#047857' },
+            { name: 'الزراعة', icon: 'fa-seedling', color: '#15803d' },
+        ];
+
+        const employersData = [
+            { name: 'شركة سبأفون', logo: 'س', industry: 'الاتصالات', jobs: 12, city: 'صنعاء' },
+            { name: 'يمن موبايل', logo: 'ي', industry: 'الاتصالات', jobs: 8, city: 'صنعاء' },
+            { name: 'البنك اليمني للإنشاء والتعمير', logo: 'ب', industry: 'البنوك', jobs: 15, city: 'صنعاء' },
+            { name: 'شركة النفط اليمنية', logo: 'ن', industry: 'النفط والغاز', jobs: 20, city: 'صنعاء' },
+            { name: 'منظمة اليونيسف - اليمن', logo: 'U', industry: 'المنظمات غير الحكومية', jobs: 25, city: 'صنعاء' },
+            { name: 'مستشفى الثورة العام', logo: 'م', industry: 'الرعاية الصحية', jobs: 18, city: 'صنعاء' },
+            { name: 'جامعة عدن', logo: 'ج', industry: 'التعليم', jobs: 10, city: 'عدن' },
+            { name: 'ميناء عدن', logo: 'م', industry: 'الخدمات اللوجستية', jobs: 6, city: 'عدن' },
+            { name: 'شركة تعز للصناعات الغذائية', logo: 'ت', industry: 'الإدارة', jobs: 9, city: 'تعز' },
+            { name: 'مؤسسة مأرب الخيرية', logo: 'خ', industry: 'المنظمات غير الحكومية', jobs: 14, city: 'مأرب' },
+        ];
+
+        // بيانات الوظائف التجريبية
+        const mockJobs = [
+            { id: 1, title: 'مطور واجهات أمامية (Frontend Developer)', company: 'شركة سبأفون', logo: 'س', city: 'صنعاء',
+                category: 'تكنولوجيا المعلومات', type: 'دوام كامل', salary: '250,000', featured: true, urgent: true,
+                description: 'نبحث عن مطور واجهات أمامية بخبرة 3+ سنوات في React و Vue.js للعمل على تطوير منصات رقمية.',
+                postedAt: '2026-05-28', tags: ['React', 'Vue.js', 'JavaScript', 'CSS'] },
+            { id: 2, title: 'محاسب مالي', company: 'البنك اليمني للإنشاء والتعمير', logo: 'ب', city: 'صنعاء',
+                category: 'المحاسبة والمالية', type: 'دوام كامل', salary: '180,000', featured: true, urgent: false,
+                description: 'مطلوب محاسب مالي بخبرة في القطاع المصرفي وإجادة استخدام الأنظمة المحاسبية.',
+                postedAt: '2026-05-27', tags: ['محاسبة', 'تقارير مالية', 'Excel'] },
+            { id: 3, title: 'مهندس مدني - مشاريع الطرق', company: 'شركة النفط اليمنية', logo: 'ن', city: 'مأرب',
+                category: 'الهندسة', type: 'مشروع مؤقت', salary: '320,000', featured: true, urgent: true,
+                description: 'مطلوب مهندس مدني للإشراف على مشاريع البنية التحتية في منطقة مأرب. خبرة 5 سنوات minimum.',
+                postedAt: '2026-05-26', tags: ['هندسة مدنية', 'إشراف', 'طرق'] },
+            { id: 4, title: 'طبيب عام', company: 'مستشفى الثورة العام', logo: 'م', city: 'صنعاء', category: 'الرعاية الصحية',
+                type: 'دوام كامل', salary: '280,000', featured: false, urgent: true,
+                description: 'مستشفى الثورة العام يعلن عن حاجته لأطباء عامين للعمل في أقسام الطوارئ.',
+                postedAt: '2026-05-25', tags: ['طب عام', 'طوارئ', 'رعاية صحية'] },
+            { id: 5, title: 'مدرس لغة إنجليزية', company: 'جامعة عدن', logo: 'ج', city: 'عدن', category: 'التعليم',
+                type: 'دوام جزئي', salary: '120,000', featured: false, urgent: false,
+                description: 'مطلوب مدرس لغة إنجليزية للتدريس في كلية الآداب. يفضل الحاصلون على شهادة TESOL.',
+                postedAt: '2026-05-24', tags: ['لغة إنجليزية', 'تدريس', 'TESOL'] },
+            { id: 6, title: 'أخصائي تسويق رقمي', company: 'يمن موبايل', logo: 'ي', city: 'صنعاء', category: 'التسويق والمبيعات',
+                type: 'دوام كامل', salary: '200,000', featured: true, urgent: false,
+                description: 'نبحث عن أخصائي تسويق رقمي لإدارة الحملات الإعلانية على وسائل التواصل الاجتماعي.',
+                postedAt: '2026-05-23', tags: ['تسويق رقمي', 'SEO', 'إعلانات'] },
+            { id: 7, title: 'مدير مشروع - منظمات إنسانية', company: 'منظمة اليونيسف - اليمن', logo: 'U', city: 'صنعاء',
+                category: 'المنظمات غير الحكومية', type: 'دوام كامل', salary: '450,000', featured: true, urgent: false,
+                description: 'إدارة مشاريع المساعدات الإنسانية في المناطق المتضررة. خبرة في العمل الميداني مطلوبة.',
+                postedAt: '2026-05-22', tags: ['إدارة مشاريع', 'عمل إنساني', 'لغة إنجليزية'] },
+            { id: 8, title: 'فني اتصالات', company: 'شركة سبأفون', logo: 'س', city: 'تعز', category: 'الاتصالات',
+                type: 'دوام كامل', salary: '140,000', featured: false, urgent: false,
+                description: 'صيانة وتركيب أبراج الاتصالات في محافظة تعز والمناطق المجاورة.',
+                postedAt: '2026-05-21', tags: ['اتصالات', 'صيانة', 'أبراج'] },
+            { id: 9, title: 'مهندس بترول', company: 'شركة النفط اليمنية', logo: 'ن', city: 'المكلا', category: 'النفط والغاز',
+                type: 'دوام كامل', salary: '500,000', featured: true, urgent: true,
+                description: 'مطلوب مهندس بترول للعمل في الحقول النفطية بمنطقة المسيلة. خبرة 7+ سنوات.',
+                postedAt: '2026-05-20', tags: ['بترول', 'حفر', 'هندسة نفط'] },
+            { id: 10, title: 'مندوب مبيعات أدوية', company: 'مستشفى الثورة العام', logo: 'م', city: 'الحديدة',
+                category: 'التسويق والمبيعات', type: 'دوام كامل', salary: '160,000', featured: false, urgent: false,
+                description: 'تسويق وبيع المستحضرات الدوائية للصيدليات والمستشفيات في محافظة الحديدة.',
+                postedAt: '2026-05-19', tags: ['مبيعات', 'أدوية', 'علاقات عامة'] },
+            { id: 11, title: 'مصمم جرافيك', company: 'يمن موبايل', logo: 'ي', city: 'عدن', category: 'تكنولوجيا المعلومات',
+                type: 'عن بعد', salary: '130,000', featured: false, urgent: false,
+                description: 'تصميم المحتوى البصري للحملات التسويقية. إجادة Adobe Creative Suite.',
+                postedAt: '2026-05-18', tags: ['Graphic Design', 'Photoshop', 'Illustrator'] },
+            { id: 12, title: 'ممرض / ممرضة', company: 'مستشفى الثورة العام', logo: 'م', city: 'إب', category: 'الرعاية الصحية',
+                type: 'دوام كامل', salary: '110,000', featured: false, urgent: true,
+                description: 'مطلوب ممرضين للعمل في أقسام الجراحة والباطنية. ترخيص مزاولة المهنة مطلوب.',
+                postedAt: '2026-05-17', tags: ['تمريض', 'رعاية صحية', 'ترخيص'] },
+            { id: 13, title: 'مدير موارد بشرية', company: 'البنك اليمني للإنشاء والتعمير', logo: 'ب', city: 'صنعاء',
+                category: 'الإدارة', type: 'دوام كامل', salary: '300,000', featured: true, urgent: false,
+                description: 'إدارة شؤون الموظفين والتوظيف والتدريب. خبرة في HR Management Systems.',
+                postedAt: '2026-05-16', tags: ['HR', 'إدارة', 'توظيف'] },
+            { id: 14, title: 'سائق نقل ثقيل', company: 'ميناء عدن', logo: 'م', city: 'عدن', category: 'الخدمات اللوجستية',
+                type: 'دوام كامل', salary: '100,000', featured: false, urgent: false,
+                description: 'نقل البضائع داخل الميناء وإلى المستودعات. رخصة قيادة نقل ثقيل سارية.',
+                postedAt: '2026-05-15', tags: ['نقل', 'لوجستيات', 'رخصة'] },
+            { id: 15, title: 'مهندس زراعي', company: 'شركة تعز للصناعات الغذائية', logo: 'ت', city: 'تعز', category: 'الزراعة',
+                type: 'دوام كامل', salary: '170,000', featured: false, urgent: false,
+                description: 'الإشراف على المزارع التعاقدية وتطوير الإنتاج الزراعي لمصانع الأغذية.',
+                postedAt: '2026-05-14', tags: ['زراعة', 'إنتاج غذائي', 'إشراف'] },
+        ];
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let allJobs = [...mockJobs];
+        let filteredJobs = [...mockJobs];
+        let currentUser = null;
+        let savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+
+        // ============================================
+        // FIREBASE OPERATIONS (مع fallback محلي)
+        // ============================================
+        async function fetchJobsFromFirebase() {
+            if (!window.firebaseReady || !window.db) {
+                console.log('استخدام البيانات المحلية (Firebase غير متصل)');
+                return [...mockJobs];
+            }
+            try {
+                const jobsRef = collection(window.db, 'jobs');
+                const q = query(jobsRef, orderBy('postedAt', 'desc'), limit(50));
+                const snapshot = await getDocs(q);
+                const jobs = [];
+                snapshot.forEach(doc => {
+                    jobs.push({ id: doc.id, ...doc.data() });
+                });
+                return jobs.length > 0 ? jobs : [...mockJobs];
+            } catch (error) {
+                console.warn('خطأ في جلب الوظائف من Firebase:', error.message);
+                return [...mockJobs];
+            }
+        }
+
+        async function addJobToFirebase(jobData) {
+            if (!window.firebaseReady || !window.db) {
+                const newJob = { id: Date.now(), ...jobData, postedAt: new Date().toISOString().split('T')[0] };
+                allJobs.unshift(newJob);
+                return newJob;
+            }
+            try {
+                const docRef = await addDoc(collection(window.db, 'jobs'), {
+                    ...jobData,
+                    postedAt: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                });
+                return { id: docRef.id, ...jobData };
+            } catch (error) {
+                console.warn('خطأ في إضافة الوظيفة:', error.message);
+                return null;
+            }
+        }
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+        function renderCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = jobCategories.map(cat => `
+                        <a href="#" class="category-card" onclick="filterByCategory('${cat.name}'); return false;" title="وظائف ${cat.name} في اليمن">
+                            <div class="cat-icon"><i class="fas ${cat.icon}"></i></div>
+                            <div class="cat-name">${cat.name}</div>
+                            <div class="cat-count">${countJobsByCategory(cat.name)} وظيفة</div>
+                        </a>
+                    `).join('');
+        }
+
+        function countJobsByCategory(category) {
+            return allJobs.filter(j => j.category === category).length;
+        }
+
+        function renderJobs(jobsToRender) {
+            const container = document.getElementById('jobsList');
+            const countEl = document.getElementById('resultCount');
+
+            if (!jobsToRender || jobsToRender.length === 0) {
+                container.innerHTML = `
+                            <div class="no-results">
+                                <i class="fas fa-search"></i>
+                                <h3>لا توجد وظائف مطابقة</h3>
+                                <p>حاول تعديل معايير البحث أو التصفية</p>
+                            </div>
+                        `;
+                countEl.textContent = '(0 نتيجة)';
+                return;
+            }
+
+            countEl.textContent = `(${jobsToRender.length} نتيجة)`;
+            container.innerHTML = jobsToRender.map(job => `
+                        <div class="job-card ${job.featured ? 'featured' : ''}" onclick="viewJobDetail(${job.id})">
+                            <div class="job-actions">
+                                <button class="btn-bookmark ${savedJobs.includes(job.id) ? 'saved' : ''}"
+                                        onclick="event.stopPropagation(); toggleSaveJob(${job.id})"
+                                        title="حفظ الوظيفة">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                            <div class="job-top">
+                                <div class="company-logo">${job.logo || 'ش'}</div>
+                                <div class="job-info">
+                                    <h3>${job.title}</h3>
+                                    <span class="company-name">${job.company}</span>
+                                </div>
+                            </div>
+                            <div class="job-meta">
+                                <span><i class="fas fa-map-marker-alt"></i> ${job.city}</span>
+                                <span><i class="fas fa-briefcase"></i> ${job.type || 'دوام كامل'}</span>
+                                ${job.salary ? `<span><i class="fas fa-money-bill-wave"></i> ${job.salary} ر.ي</span>` : ''}
+                                <span><i class="fas fa-calendar-alt"></i> ${job.postedAt || 'حديث'}</span>
+                            </div>
+                            <div class="job-tags">
+                                ${job.urgent ? '<span class="job-tag urgent">🔴 عاجل</span>' : ''}
+                                ${job.featured ? '<span class="job-tag">⭐ مميزة</span>' : ''}
+                                ${(job.tags || []).slice(0, 3).map(t => `<span class="job-tag">${t}</span>`).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+        }
+
+        function renderEmployers() {
+            const grid = document.getElementById('employersGrid');
+            grid.innerHTML = employersData.map(emp => `
+                        <div class="employer-card" onclick="filterByEmployer('${emp.name}')" title="وظائف ${emp.name}">
+                            <div class="emp-logo">${emp.logo}</div>
+                            <h4>${emp.name}</h4>
+                            <p class="emp-jobs">${emp.jobs} وظيفة متاحة</p>
+                            <p style="font-size:0.78rem;color:var(--text-muted);"><i class="fas fa-map-marker-alt"></i> ${emp.city}</p>
+                        </div>
+                    `).join('');
+        }
+
+        function viewJobDetail(jobId) {
+            const job = allJobs.find(j => j.id === jobId);
+            if (!job) return;
+            // إنشاء modal تفاصيل الوظيفة
+            const detailHTML = `
+                        <div class="modal-overlay active" id="jobDetailModal" onclick="if(event.target===this)closeModal('jobDetailModal')">
+                            <div class="modal" style="max-width:600px;text-align:right;">
+                                <button class="modal-close" onclick="closeModal('jobDetailModal')">&times;</button>
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                                    <div class="company-logo" style="width:56px;height:56px;font-size:1.3rem;">${job.logo||'ش'}</div>
+                                    <div>
+                                        <h2 style="margin:0;font-size:1.25rem;">${job.title}</h2>
+                                        <p style="margin:0;color:var(--text-light);">${job.company} - ${job.city}</p>
+                                    </div>
+                                </div>
+                                <div class="job-meta" style="margin-bottom:14px;">
+                                    <span><i class="fas fa-briefcase"></i> ${job.type||'دوام كامل'}</span>
+                                    ${job.salary?`<span><i class="fas fa-money-bill-wave"></i> ${job.salary} ر.ي</span>`:''}
+                                    <span><i class="fas fa-calendar-alt"></i> ${job.postedAt||'حديث'}</span>
+                                    <span><i class="fas fa-tag"></i> ${job.category}</span>
+                                </div>
+                                <div style="background:var(--bg-gray);padding:16px;border-radius:var(--radius-sm);margin-bottom:14px;">
+                                    <strong>الوصف الوظيفي:</strong>
+                                    <p style="margin-top:6px;color:var(--text-medium);">${job.description||'يرجى التواصل مع جهة العمل لمزيد من التفاصيل.'}</p>
+                                </div>
+                                ${job.tags?.length?`<div class="job-tags" style="margin-bottom:14px;">${job.tags.map(t=>`<span class="job-tag">${t}</span>`).join('')}</div>`:''}
+                                <button class="btn btn-primary btn-block btn-lg" onclick="applyForJob(${job.id})">
+                                    <i class="fas fa-paper-plane"></i> تقديم طلب التوظيف
+                                </button>
+                                <button class="btn btn-outline btn-block" style="margin-top:8px;" onclick="toggleSaveJob(${job.id});closeModal('jobDetailModal');">
+                                    <i class="fas fa-bookmark"></i> ${savedJobs.includes(job.id)?'محفوظة':'حفظ الوظيفة'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+            // إزالة أي modal سابق
+            const existing = document.getElementById('jobDetailModal');
+            if (existing) existing.remove();
+            document.body.insertAdjacentHTML('beforeend', detailHTML);
+            document.getElementById('jobDetailModal').classList.add('active');
+        }
+
+        function applyForJob(jobId) {
+            const job = allJobs.find(j => j.id === jobId);
+            if (!currentUser) {
+                showToast('يرجى تسجيل الدخول أولاً للتقديم على الوظيفة', 'error');
+                closeModal('jobDetailModal');
+                setTimeout(() => openModal('loginModal'), 400);
+                return;
+            }
+            showToast(`تم تقديم طلبك لوظيفة "${job?.title||''}" بنجاح! 🎉`, 'success');
+            closeModal('jobDetailModal');
+        }
+
+        function toggleSaveJob(jobId) {
+            if (savedJobs.includes(jobId)) {
+                savedJobs = savedJobs.filter(id => id !== jobId);
+                showToast('تم إلغاء حفظ الوظيفة', '');
+            } else {
+                savedJobs.push(jobId);
+                showToast('تم حفظ الوظيفة بنجاح ⭐', 'success');
+            }
+            localStorage.setItem('savedJobs', JSON.stringify(savedJobs));
+            renderJobs(filteredJobs);
+        }
+
+        // ============================================
+        // SEARCH & FILTER
+        // ============================================
+        function searchJobs() {
+            const keyword = (document.getElementById('searchKeyword')?.value || '').toLowerCase().trim();
+            const city = document.getElementById('searchCity')?.value || '';
+            const category = document.getElementById('searchCategory')?.value || '';
+
+            // مزامنة الفلاتر الجانبية
+            if (city) document.getElementById('filterCity').value = city;
+            if (category) document.getElementById('filterCategory').value = category;
+
+            applyFilters(keyword);
+            // التمرير إلى قسم الوظائف
+            document.getElementById('jobs-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function applyFilters(overrideKeyword = null) {
+            const keyword = overrideKeyword || (document.getElementById('searchKeyword')?.value || '').toLowerCase()
+                .trim();
+            const city = document.getElementById('filterCity')?.value || '';
+            const category = document.getElementById('filterCategory')?.value || '';
+            const jobType = document.getElementById('filterJobType')?.value || '';
+            const minSalaryStr = document.getElementById('filterMinSalary')?.value || '';
+            const featuredOnly = document.getElementById('filterFeatured')?.checked || false;
+            const minSalary = minSalaryStr ? parseInt(minSalaryStr.replace(/[^0-9]/g, '')) : 0;
+
+            filteredJobs = allJobs.filter(job => {
+                if (keyword && !job.title.toLowerCase().includes(keyword) &&
+                    !job.company.toLowerCase().includes(keyword) &&
+                    !(job.tags || []).some(t => t.toLowerCase().includes(keyword)) &&
+                    !job.category.toLowerCase().includes(keyword)) {
+                    return false;
+                }
+                if (city && job.city !== city) return false;
+                if (category && job.category !== category) return false;
+                if (jobType && job.type !== jobType) return false;
+                if (featuredOnly && !job.featured) return false;
+                if (minSalary > 0 && job.salary) {
+                    const jobSalary = parseInt(job.salary.replace(/[^0-9]/g, ''));
+                    if (jobSalary < minSalary) return false;
+                }
+                return true;
+            });
+
+            renderJobs(filteredJobs);
+        }
+
+        function resetFilters() {
+            document.getElementById('filterCity').value = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterJobType').value = '';
+            document.getElementById('filterMinSalary').value = '';
+            document.getElementById('filterFeatured').checked = false;
+            document.getElementById('searchKeyword').value = '';
+            document.getElementById('searchCity').value = '';
+            document.getElementById('searchCategory').value = '';
+            filteredJobs = [...allJobs];
+            renderJobs(filteredJobs);
+            showToast('تم إعادة ضبط الفلاتر', '');
+        }
+
+        function filterByCategory(category) {
+            document.getElementById('filterCategory').value = category;
+            document.getElementById('searchCategory').value = category;
+            applyFilters();
+            document.getElementById('jobs-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function filterByEmployer(employerName) {
+            document.getElementById('searchKeyword').value = employerName;
+            applyFilters(employerName.toLowerCase());
+            document.getElementById('jobs-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function searchByCity(city) {
+            document.getElementById('filterCity').value = city;
+            document.getElementById('searchCity').value = city;
+            applyFilters();
+            document.getElementById('jobs-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ============================================
+        // AUTHENTICATION HANDLERS
+        // ============================================
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showToast('يرجى إدخال البريد الإلكتروني وكلمة المرور', 'error');
+                return;
+            }
+
+            if (window.firebaseReady && window.auth) {
+                try {
+                    const userCredential = await signInWithEmailAndPassword(window.auth, email, password);
+                    currentUser = userCredential.user;
+                    showToast(`مرحباً بعودتك! 👋`, 'success');
+                    closeModal('loginModal');
+                    updateNavForLoggedInUser();
+                } catch (error) {
+                    console.error('خطأ في تسجيل الدخول:', error);
+                    showToast('فشل تسجيل الدخول. تحقق من بياناتك.', 'error');
+                }
+            } else {
+                // محاكاة تسجيل الدخول (وضع offline)
+                currentUser = { email, displayName: email.split('@')[0], uid: 'local-' + Date.now() };
+                showToast(`مرحباً! تم تسجيل الدخول (وضع محلي) 👋`, 'success');
+                closeModal('loginModal');
+                updateNavForLoggedInUser();
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const city = document.getElementById('regCity').value;
+            const role = document.getElementById('regRole').value;
+
+            if (!name || !email || !password) {
+                showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+                return;
+            }
+
+            if (window.firebaseReady && window.auth) {
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+                    currentUser = userCredential.user;
+                    // حفظ بيانات إضافية في Firestore
+                    if (window.db) {
+                        await addDoc(collection(window.db, 'users'), {
+                            uid: userCredential.user.uid,
+                            name,
+                            email,
+                            city,
+                            role,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                    showToast(`تم إنشاء الحساب بنجاح! 🎉`, 'success');
+                    closeModal('registerModal');
+                    updateNavForLoggedInUser();
+                } catch (error) {
+                    console.error('خطأ في التسجيل:', error);
+                    if (error.code === 'auth/email-already-in-use') {
+                        showToast('البريد الإلكتروني مستخدم بالفعل', 'error');
+                    } else {
+                        showToast('فشل إنشاء الحساب. حاول مرة أخرى.', 'error');
+                    }
+                }
+            } else {
+                // محاكاة التسجيل (وضع offline)
+                currentUser = { email, displayName: name, uid: 'local-' + Date.now(), city, role };
+                showToast(`تم إنشاء الحساب بنجاح! (وضع محلي) 🎉`, 'success');
+                closeModal('registerModal');
+                updateNavForLoggedInUser();
+            }
+        }
+
+        function updateNavForLoggedInUser() {
+            const navActions = document.querySelector('.nav-actions');
+            if (currentUser) {
+                const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم';
+                navActions.innerHTML = `
+                            <span style="font-weight:600;color:var(--primary);font-size:0.9rem;">
+                                <i class="fas fa-user-circle"></i> ${displayName}
+                            </span>
+                            <button class="btn btn-outline btn-sm" onclick="handleLogout()">
+                                <i class="fas fa-sign-out-alt"></i> خروج
+                            </button>
+                        `;
+            }
+        }
+
+        async function handleLogout() {
+            if (window.firebaseReady && window.auth) {
+                try {
+                    await signOut(window.auth);
+                } catch (e) { /* ignore */ }
+            }
+            currentUser = null;
+            showToast('تم تسجيل الخروج بنجاح', '');
+            location.reload();
+        }
+
+        // ============================================
+        // MODAL HELPERS
+        // ============================================
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function switchModal(fromId, toId) {
+            closeModal(fromId);
+            setTimeout(() => openModal(toId), 300);
+        }
+
+        // ============================================
+        // TOAST NOTIFICATION
+        // ============================================
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // MOBILE MENU
+        // ============================================
+        function setupMobileMenu() {
+            const menuToggle = document.getElementById('menuToggle');
+            const navLinks = document.getElementById('navLinks');
+            if (menuToggle && navLinks) {
+                menuToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('open');
+                });
+                // إغلاق القائمة عند النقر على رابط
+                navLinks.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navLinks.classList.remove('open');
+                    });
+                });
+                // إغلاق عند النقر خارج القائمة
+                document.addEventListener('click', (e) => {
+                    if (!navLinks.contains(e.target) && e.target !== menuToggle && !menuToggle
+                        .contains(e.target)) {
+                        navLinks.classList.remove('open');
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // NAVBAR SCROLL EFFECT
+        // ============================================
+        function setupNavbarScroll() {
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // ============================================
+        // KEYBOARD SUPPORT - Enter key in search
+        // ============================================
+        function setupKeyboardShortcuts() {
+            const searchInputs = ['searchKeyword', 'filterMinSalary'];
+            searchInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            searchJobs();
+                        }
+                    });
+                }
+            });
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        async function init() {
+            // جلب الوظائف (من Firebase أو محلياً)
+            const jobs = await fetchJobsFromFirebase();
+            allJobs = jobs;
+            filteredJobs = [...allJobs];
+
+            // عرض البيانات
+            renderCategories();
+            renderJobs(filteredJobs);
+            renderEmployers();
+
+            // تحديث عداد الوظائف
+            document.getElementById('statJobs').textContent = allJobs.length.toLocaleString('ar') + '+';
+
+            // إعداد المراقبين
+            setupMobileMenu();
+            setupNavbarScroll();
+            setupKeyboardShortcuts();
+
+            // مراقبة حالة المصادقة من Firebase
+            if (window.firebaseReady && window.auth) {
+                onAuthStateChanged(window.auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        updateNavForLoggedInUser();
+                    } else {
+                        currentUser = null;
+                    }
+                });
+            }
+
+            console.log('🚀 شغلي - موقع التوظيف اليمني جاهز للعمل');
+            console.log('📊 عدد الوظائف:', allJobs.length);
+            console.log('🏢 عدد جهات العمل:', employersData.length);
+            console.log('🔥 Firebase:', window.firebaseReady ? 'متصل' : 'وضع محلي');
+        }
+
+        // بدء التشغيل
+        document.addEventListener('DOMContentLoaded', init);
+
+        // تعريض الدوال للنطاق العام
+        window.searchJobs = searchJobs;
+        window.applyFilters = applyFilters;
+        window.resetFilters = resetFilters;
+        window.filterByCategory = filterByCategory;
+        window.filterByEmployer = filterByEmployer;
+        window.searchByCity = searchByCity;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.switchModal = switchModal;
+        window.viewJobDetail = viewJobDetail;
+        window.toggleSaveJob = toggleSaveJob;
+        window.applyForJob = applyForJob;
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.handleLogout = handleLogout;
+    </script>
+</body>
+</html>
