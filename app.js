@@ -6,13 +6,15 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // استبدل هذه القيم بمشروع Firebase الخاص بك
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyD-PLACEHOLDER-KEY-REPLACE-WITH-YOURS",
-    authDomain: "shaghalni-ye.firebaseapp.com",
-    projectId: "shaghalni-ye",
-    storageBucket: "shaghalni-ye.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abcdef1234567890abcdef"
+  apiKey: "AIzaSyAyWmacChzw5Wl-D_YkEObJw74qliw8OQs",
+  authDomain: "shaghalni-web.firebaseapp.com",
+  projectId: "shaghalni-web",
+  storageBucket: "shaghalni-web.firebasestorage.app",
+  messagingSenderId: "97870619288",
+  appId: "1:97870619288:web:aa949c94ca59a39e0126ed",
+  measurementId: "G-SW6K435LB1"
 };
 
 let app, auth, db;
