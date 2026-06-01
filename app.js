@@ -160,9 +160,9 @@ async function fetchJobsFromFirebase() {
         const q = query(jobsRef, orderBy('postedAt', 'desc'), limit(50));
         const snapshot = await getDocs(q);
         const jobs = [];
-        snapshot.forEach(doc => {
-            jobs.push({ id: doc.id, ...doc.data() });
-        });
+     snapshot.forEach(doc => {
+    jobs.push({ id: doc.id, ...doc.data() });
+});
         return jobs.length > 0 ? jobs : [...mockJobs];
     } catch (error) {
         console.warn('خطأ في جلب الوظائف من Firebase:', error.message);
@@ -227,7 +227,7 @@ function renderJobs(jobsToRender) {
     container.innerHTML = jobsToRender.map(job => `
         <div class="job-card ${job.featured ? 'featured' : ''}" onclick="viewJobDetail(${job.id})">
             <div class="job-actions">
-                <button class="btn-bookmark ${savedJobs.includes(job.id) ? 'saved' : ''}"
+                <button class="btn-bookmark ${(savedJobs.includes(job.id) || savedJobs.includes(String(job.id))) ? 'saved' : ''}"
                         onclick="event.stopPropagation(); toggleSaveJob(${job.id})"
                         title="حفظ الوظيفة">
                     <i class="fas fa-bookmark"></i>
@@ -268,7 +268,7 @@ function renderEmployers() {
 }
 
 function viewJobDetail(jobId) {
-    const job = allJobs.find(j => j.id === jobId);
+    const job = allJobs.find(j => j.id == jobId || j.id === jobId);
     if (!job) return;
     const detailHTML = `
         <div class="modal-overlay active" id="jobDetailModal" onclick="if(event.target===this)closeModal('jobDetailModal')">
@@ -308,7 +308,7 @@ function viewJobDetail(jobId) {
 }
 
 function applyForJob(jobId) {
-    const job = allJobs.find(j => j.id === jobId);
+    const job = allJobs.find(j => j.id == jobId || j.id === jobId);
     if (!currentUser) {
         showToast('يرجى تسجيل الدخول أولاً للتقديم على الوظيفة', 'error');
         closeModal('jobDetailModal');
