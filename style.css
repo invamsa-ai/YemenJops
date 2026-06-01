@@ -1011,3 +1011,46 @@ body {
         padding: 20px 16px;
     }
 }
+/* ============ LOADING SPINNER ============ */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed !important;
+}
+
+/* تنسيق حقل رفع الملفات */
+input[type="file"].form-input {
+    padding: 8px 12px;
+    cursor: pointer;
+    background: var(--bg-light);
+}
+
+input[type="file"].form-input::-webkit-file-upload-button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    margin-left: 10px;
+    transition: var(--transition);
+}
+
+input[type="file"].form-input::-webkit-file-upload-button:hover {
+    background: var(--primary-dark);
+}
+
+small {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+}
