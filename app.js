@@ -249,6 +249,10 @@ function viewJobDetail(jobId) {
         }
     }
     
+    // رقم بوت التيليجرام - يمكنك تغيير الرقم
+    const telegramNumber = "+967123456789"; // ضع رقم التيليجرام هنا
+    const telegramMessage = encodeURIComponent(`مرحباً، أرغب في التقديم على وظيفة: ${job.title}\nالشركة: ${job.company}\nالموقع: ${job.city}\n\nالاسم: ${currentUser?.displayName || ''}\nالبريد الإلكتروني: ${currentUser?.email || ''}\n\nتم إرفاق السيرة الذاتية.`);
+    
     const detailHTML = `
         <div class="modal-overlay active" id="jobDetailModal" onclick="if(event.target===this)closeModal('jobDetailModal')">
             <div class="modal" style="max-width:600px;text-align:right;">
@@ -272,18 +276,24 @@ function viewJobDetail(jobId) {
                 </div>
                 ${job.tags?.length ? `<div class="job-tags" style="margin-bottom:14px;">${job.tags.map(t => `<span class="job-tag">${t}</span>`).join('')}</div>` : ''}
                 
-                <div id="applicationForm" style="display:${currentUser ? 'block' : 'none'};">
-                    <div class="form-group">
-                        <label><i class="fas fa-file-pdf"></i> رفع السيرة الذاتية (PDF, DOC, DOCX)</label>
-                     <input type="file" id="cvFile" accept=".pdf,.doc,.docx" class="form-input" style="padding:8px;">
-<small style="color:var(--text-muted);">الحد الأقصى: 100 ميجابايت (PDF, DOC, DOCX)</small>
+                <!-- قسم التقديم عبر التيليجرام -->
+                <div style="background:linear-gradient(135deg, #0088cc, #00a3e0); padding:20px; border-radius:var(--radius-md); margin-bottom:14px; text-align:center; color:white;">
+                    <i class="fab fa-telegram-plane" style="font-size:48px; margin-bottom:10px;"></i>
+                    <h3 style="color:white; margin-bottom:10px;">📱 التقديم عبر تيليجرام</h3>
+                    <p style="margin-bottom:15px; opacity:0.95;">للتواصل مع جهة العمل، يرجى إرسال سيرتك الذاتية على تيليجرام</p>
+                    <div style="background:white; border-radius:12px; padding:12px; margin:10px 0;">
+                        <p style="color:#0088cc; font-size:1.2rem; font-weight:bold; margin:0;">
+                            <i class="fab fa-telegram"></i> @ShaghalniJobs
+                        </p>
+                        <p style="color:#666; font-size:0.8rem; margin:5px 0 0 0;">أو اضغط الزر أدناه للتواصل المباشر</p>
                     </div>
-                    <button class="btn btn-primary btn-block btn-lg" onclick="applyForJob('${jobIdStr}')" id="applyBtn">
-                        <i class="fas fa-paper-plane"></i> تقديم طلب التوظيف
-                    </button>
+                    <a href="https://t.me/ShaghalniJobs" target="_blank" class="btn" style="background:white; color:#0088cc; border-radius:30px; padding:10px 25px; margin-top:10px; display:inline-block; text-decoration:none; font-weight:bold;">
+                        <i class="fab fa-telegram"></i> تواصل الآن عبر تيليجرام
+                    </a>
                 </div>
-                <div id="loginPrompt" style="display:${currentUser ? 'none' : 'block'};text-align:center;">
-                    <p style="margin-bottom:10px;color:var(--text-light);">يجب تسجيل الدخول للتقديم على الوظيفة</p>
+                
+                <div id="loginPrompt" style="display:${currentUser ? 'none' : 'block'};text-align:center; background:#f0f0f0; padding:15px; border-radius:var(--radius-sm);">
+                    <p style="margin-bottom:10px;color:var(--text-light);"><i class="fas fa-info-circle"></i> يرجى تسجيل الدخول لعرض معلومات التواصل</p>
                     <button class="btn btn-primary" onclick="closeModal('jobDetailModal');setTimeout(()=>openModal('loginModal'),300);">
                         <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
                     </button>
@@ -303,164 +313,46 @@ function viewJobDetail(jobId) {
 }
 
 // ============================================
-// APPLY FOR JOB WITH LOADING & CV UPLOAD
+// TELEGRAM APPLICATION (بدلاً من رفع الملفات)
 // ============================================
-// استبدل دالة applyForJob بهذا الكود
-// ============================================
-// APPLY FOR JOB WITH LOADING & CV UPLOAD (حتى 10MB)
-// ============================================
-async function applyForJob(jobId) {
+async function applyViaTelegram(jobId) {
     const job = allJobs.find(j => String(j.id) === String(jobId));
     
     if (!currentUser) {
-        showToast('يرجى تسجيل الدخول أولاً للتقديم على الوظيفة', 'error');
+        showToast('يرجى تسجيل الدخول أولاً', 'error');
         closeModal('jobDetailModal');
         setTimeout(() => openModal('loginModal'), 400);
         return;
     }
     
-    if (!window.firebaseReady || !window.db) {
-        showToast('خدمة التقديم غير متاحة حالياً', 'error');
-        return;
-    }
-    
-    const applyBtn = document.getElementById('applyBtn');
-    const originalBtnText = applyBtn ? applyBtn.innerHTML : '';
-    
-    if (applyBtn) {
-        applyBtn.disabled = true;
-        applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التقديم...';
-        applyBtn.style.opacity = '0.7';
-        applyBtn.style.cursor = 'not-allowed';
-    }
-    
+    // حفظ طلب التقديم في Firestore
     try {
-        // جلب بيانات المستخدم
-        let userName = 'مستخدم';
-        let userEmail = currentUser.email || '';
-        let userPhone = '';
-        
-        if (window.db) {
-            const usersRef = collection(window.db, 'users');
-            const q = query(usersRef, where('uid', '==', currentUser.uid), limit(1));
-            const snapshot = await getDocs(q);
-            
-            if (!snapshot.empty) {
-                const userData = snapshot.docs[0].data();
-                userName = userData.name || currentUser.displayName || 'مستخدم';
-                userEmail = userData.email || currentUser.email || '';
-                userPhone = userData.phone || '';
-            }
-        }
-        
-        // رفع السيرة الذاتية - دعم حتى 100 ميجابايت
-        let cvUrl = '';
-        let cvFileName = '';
-        const cvFileInput = document.getElementById('cvFile');
-        
-        if (cvFileInput && cvFileInput.files.length > 0) {
-            const file = cvFileInput.files[0];
-            const MAX_SIZE = 100 * 1024 * 1024; // 100 ميجابايت
-            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            
-            // التحقق من الحجم
-            if (file.size > MAX_SIZE) {
-                throw new Error(`⚠️ حجم الملف كبير جداً (${fileSizeMB} MB). الحد الأقصى 100 MB`);
-            }
-            
-            // التحقق من نوع الملف
-            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            if (!allowedTypes.includes(file.type)) {
-                throw new Error('❌ يرجى رفع ملف PDF أو DOC أو DOCX فقط');
-            }
-            
-            showToast(`📄 جاري رفع السيرة الذاتية (${fileSizeMB} MB)...`, '');
-            
-            if (window.storage && firebaseReady) {
-                // رفع إلى Firebase Storage
-                const fileName = `${currentUser.uid}_${Date.now()}_${file.name}`;
-                const storageRef = ref(window.storage, `cvs/${fileName}`);
-                const uploadTask = uploadBytesResumable(storageRef, file);
-                
-                cvUrl = await new Promise((resolve, reject) => {
-                    uploadTask.on('state_changed',
-                        (snapshot) => {
-                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            showToast(`⏳ جاري الرفع... ${Math.round(progress)}%`, '');
-                        },
-                        (error) => reject(error),
-                        async () => {
-                            const url = await getDownloadURL(uploadTask.snapshot.ref);
-                            resolve(url);
-                        }
-                    );
-                });
-                
-                cvFileName = file.name;
-                showToast(`✅ تم رفع السيرة الذاتية بنجاح`, 'success');
-            } else {
-                // استخدام Base64 كحل بديل (للملفات الصغيرة فقط)
-                if (file.size > 5 * 1024 * 1024) {
-                    throw new Error('خدمة التخزين غير متاحة للملفات الكبيرة. يرجى المحاولة لاحقاً.');
-                }
-                
-                cvUrl = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-                cvFileName = file.name;
-            }
-        } else {
-            showToast('⚠️ يرجى اختيار السيرة الذاتية قبل التقديم', 'error');
-            if (applyBtn) {
-                applyBtn.disabled = false;
-                applyBtn.innerHTML = originalBtnText;
-                applyBtn.style.opacity = '1';
-            }
-            return;
-        }
-        
-        // حفظ بيانات المتقدم
         await addDoc(collection(window.db, 'applicants'), {
             userId: currentUser.uid,
-            name: userName,
-            email: userEmail,
-            phone: userPhone,
+            userEmail: currentUser.email,
+            userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم',
             jobId: String(jobId),
             jobTitle: job?.title || '',
             jobCompany: job?.company || '',
             jobCity: job?.city || '',
-            cvUrl: cvUrl,
-            cvFileName: cvFileName,
-            cvSize: cvFileInput.files[0]?.size || 0,
-            status: 'جديد',
-            appliedAt: serverTimestamp(),
-            createdAt: serverTimestamp()
+            applicationMethod: 'telegram',
+            status: 'تم التوجيه للتليجرام',
+            appliedAt: serverTimestamp()
         });
         
-        showToast(`🎉 تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح!`, 'success');
+        showToast('📱 سيتم توجيهك إلى تيليجرام لإرسال السيرة الذاتية', 'success');
         
-        if (applyBtn) {
-            applyBtn.innerHTML = '<i class="fas fa-check"></i> تم التقديم بنجاح';
-            applyBtn.style.background = '#10b981';
-            applyBtn.disabled = true;
-        }
-        
-        setTimeout(() => closeModal('jobDetailModal'), 2000);
+        // فتح تيليجرام
+        setTimeout(() => {
+            window.open('https://t.me/ShaghalniJobs', '_blank');
+        }, 1000);
         
     } catch (error) {
-        console.error('خطأ في التقديم:', error);
-        showToast(error.message || '❌ فشل التقديم، حاول مرة أخرى', 'error');
-        
-        if (applyBtn) {
-            applyBtn.disabled = false;
-            applyBtn.innerHTML = originalBtnText;
-            applyBtn.style.opacity = '1';
-        }
+        console.error(error);
+        showToast('❌ حدث خطأ، حاول مرة أخرى', 'error');
     }
 }
+
 function toggleSaveJob(jobId) {
     const jobIdStr = String(jobId);
     if (savedJobs.includes(jobIdStr)) {
@@ -820,7 +712,7 @@ window.closeModal = closeModal;
 window.switchModal = switchModal;
 window.viewJobDetail = viewJobDetail;
 window.toggleSaveJob = toggleSaveJob;
-window.applyForJob = applyForJob;
+window.applyViaTelegram = applyViaTelegram;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
 window.handleLogout = handleLogout;
