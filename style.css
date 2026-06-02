@@ -1,29 +1,64 @@
 
 :root {
- --primary: #0d6b4f;
-    --primary-dark: #084d38;
-    --primary-light: #e8f5f0;
-    --secondary: #f4a024;
-    --secondary-dark: #d4891a;
-    --accent: #1a8a6a;
-    --text-dark: #1a1a2e;
-    --text-medium: #444;
-    --text-light: #6b7280;
-    --text-muted: #9ca3af;
-    --bg-light: #f8fafb;
-    --bg-white: #ffffff;
-    --bg-gray: #f3f4f6;
-    --border: #e5e7eb;
-    --border-light: #f0f0f0;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-    --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-    --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.16);
+    /* ===== الألوان الرئيسية ===== */
+    --primary: #92a7a0;           /* اللون الرئيسي (الرمادي-الأخضر) */
+    --primary-dark: #768d85;      /* أغمق بنسبة 15% للأزرار عند التمرير */
+    --primary-light: #eef3f1;     /* فاتح جداً للخلفيات والأيقونات */
+    --primary-bg: #f5f8f7;        /* خلفية فاتحة جداً للأقسام */
+    
+    /* ===== الألوان الثانوية ===== */
+    --secondary: #c9a87c;         /* لون دافئ (ذهب/بني فاتح) لإبراز العناصر */
+    --secondary-dark: #b89264;    /* أغمق قليلاً للتمرير */
+    --secondary-light: #f8f2ea;   /* فاتح جداً للخلفيات */
+    
+    /* ===== لون مميز (Accent) ===== */
+    --accent: #b8c0b5;            /* لون محايد متناسق */
+    --accent-dark: #9eaa9b;       /* أغمق للتمرير */
+    
+    /* ===== ألوان النصوص ===== */
+    --text-dark: #2c3e35;         /* أخضر غامق جداً للعناوين (يتماشى مع اللون الرئيسي) */
+    --text-medium: #4a5c55;       /* رمادي-أخضر متوسط للنصوص العادية */
+    --text-light: #7a8a84;        /* فاتح للنصوص الثانوية */
+    --text-muted: #a3b3ad;        /* مكتوم جداً للنصوص الأقل أهمية */
+    --text-white: #ffffff;        /* أبيض للنصوص على الخلفيات الداكنة */
+    
+    /* ===== ألوان الخلفيات ===== */
+    --bg-light: #fafcfb;          /* خلفية الصفحة الرئيسية */
+    --bg-white: #ffffff;          /* أبيض نقي للبطاقات */
+    --bg-gray: #f2f5f4;          /* رمادي فاتح جداً للأقسام الجانبية */
+    --bg-primary-soft: #eef3f1;   /* خلفية ناعمة بلون الرئيسي */
+    
+    /* ===== ألوان الحدود ===== */
+    --border: #d9e2de;            /* حدود متناسقة مع اللون الرئيسي */
+    --border-light: #e8efec;      /* حدود أفتح */
+    --border-focus: #92a7a0;      /* حدود عند التركيز (مطابقة للرئيسي) */
+    
+    /* ===== ألوان الحالات (Status) ===== */
+    --success: #6f9e7c;           /* أخضر للنجاح/مقبول */
+    --success-light: #e8f3ec;     /* خلفية فاتحة للحالة الناجحة */
+    --warning: #e0a878;           /* برتقالي للتحذيرات */
+    --warning-light: #fdf4ea;     /* خلفية فاتحة للتحذير */
+    --error: #c97d7d;            /* أحمر للأخطاء/مرفوض */
+    --error-light: #f8efef;       /* خلفية فاتحة للخطأ */
+    --info: #7d9ec9;             /* أزرق للمعلومات */
+    --info-light: #eef2f8;        /* خلفية فاتحة للمعلومات */
+    
+    /* ===== الظلال ===== */
+    --shadow-sm: 0 1px 3px rgba(44, 62, 53, 0.06);
+    --shadow: 0 4px 16px rgba(44, 62, 53, 0.08);
+    --shadow-lg: 0 8px 32px rgba(44, 62, 53, 0.12);
+    --shadow-xl: 0 12px 40px rgba(44, 62, 53, 0.16);
+    
+    /* ===== الزوايا ===== */
     --radius-sm: 8px;
     --radius: 12px;
     --radius-lg: 16px;
     --radius-xl: 20px;
+    
+    /* ===== الانتقالات ===== */
     --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* ===== الخط ===== */
     --font-family: 'Tajawal', 'Segoe UI', sans-serif;
 }
 
