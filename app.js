@@ -63,13 +63,37 @@ const jobCategories = [
 ];
 
 // بيانات المحافظ الإلكترونية
+// استبدال بيانات المحافظ الإلكترونية (wallets) بهذا الكود:
 const wallets = {
-    'جوال': { name: 'جوال - Mobile Money', number: '770123456', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=770123456', recipient: 'شغلي للتشغيل والخدمات' },
-    'كاش': { name: 'كاش - Cash', number: '780123456', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=780123456', recipient: 'شغلي للتشغيل والخدمات' },
-    'جيب': { name: 'جيب - Jeeb', number: '790123456', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=790123456', recipient: 'شغلي للتشغيل والخدمات' },
-    'فلوسك': { name: 'فلوسك - Floosak', number: '771234567', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=771234567', recipient: 'شغلي للتشغيل والخدمات' }
+    'جوال': { 
+        name: 'جوال - Mobile Money', 
+        number: '770123456', 
+        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=770123456', 
+        recipient: 'شغلي للتشغيل والخدمات',
+        image: 'jawal.png' // ضع مسار صورتك هنا
+    },
+    'كاش': { 
+        name: 'كاش - Cash', 
+        number: '780123456', 
+        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=780123456', 
+        recipient: 'شغلي للتشغيل والخدمات',
+        image: 'cash.png' // ضع مسار صورتك هنا
+    },
+    'جيب': { 
+        name: 'جيب - Jeeb', 
+        number: '790123456', 
+        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=790123456', 
+        recipient: 'شغلي للتشغيل والخدمات',
+        image: 'jeeb.png' // ضع مسار صورتك هنا
+    },
+    'فلوسك': { 
+        name: 'فلوسك - Floosak', 
+        number: '771234567', 
+        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=771234567', 
+        recipient: 'شغلي للتشغيل والخدمات',
+        image: 'floosak.png' // ضع مسار صورتك هنا
+    }
 };
-
 const APPLICATION_FEE = 1000; // 1000 ريال يمني
 
 // ============================================
@@ -330,6 +354,7 @@ async function startApplication(jobId) {
 // ============================================
 // عرض نموذج الدفع
 // ============================================
+// عرض نموذج الدفع - نسخة بالصور
 function showPaymentModal() {
     if (!pendingApplication) {
         showToast('لا توجد طلبات معلقة', 'error');
@@ -338,8 +363,8 @@ function showPaymentModal() {
     
     const walletsHTML = Object.entries(wallets).map(([key, wallet]) => `
         <div class="wallet-option" onclick="showWalletDetails('${key}')" style="cursor:pointer; text-align:center; padding:15px; border:2px solid var(--border); border-radius:var(--radius-md); transition:all 0.3s; background:white;">
-            <i class="fas fa-wallet" style="font-size:32px; color:var(--primary);"></i>
-            <h4 style="margin:8px 0 0 0;">${wallet.name}</h4>
+            <img src="${wallet.image}" alt="${wallet.name}" style="width:48px; height:48px; object-fit:contain; margin-bottom:8px;" onerror="this.src='https://via.placeholder.com/48?text=${key}'">
+            <h4 style="margin:8px 0 0 0; font-size:0.9rem;">${wallet.name}</h4>
         </div>
     `).join('');
     
@@ -400,10 +425,10 @@ function showPaymentModal() {
     document.body.insertAdjacentHTML('beforeend', paymentHTML);
     document.getElementById('paymentModal').classList.add('active');
 }
-
 // ============================================
 // عرض تفاصيل المحفظة المختارة
 // ============================================
+// عرض تفاصيل المحفظة المختارة مع الصورة
 function showWalletDetails(walletKey) {
     const wallet = wallets[walletKey];
     if (!wallet) return;
@@ -414,10 +439,10 @@ function showWalletDetails(walletKey) {
     
     walletDetailsContent.innerHTML = `
         <h4 style="margin-bottom:15px;"><i class="fas fa-university"></i> بيانات الدفع عبر ${wallet.name}</h4>
-        <div style="text-align:center; margin-bottom:15px;">
-            <img src="${wallet.qrCode}" alt="QR Code" style="width:150px; height:150px; border-radius:12px; margin-bottom:10px;">
-            <div>
-               
+        <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
+            <img src="${wallet.image}" alt="${wallet.name}" style="width:80px; height:80px; object-fit:contain; border-radius:12px;">
+            <div style="text-align:center; margin-bottom:15px;">
+                <img src="${wallet.qrCode}" alt="QR Code" style="width:150px; height:150px; border-radius:12px; margin-bottom:10px;">
             </div>
         </div>
         <div style="background:white; padding:12px; border-radius:var(--radius-sm); margin-bottom:10px;">
