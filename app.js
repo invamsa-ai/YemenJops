@@ -480,6 +480,15 @@ function downloadQRCode(qrUrl, walletName) {
 // ============================================
 // تأكيد الدفع وإرسال الطلب (بدون Firebase Storage)
 // ============================================
+// ============================================
+// تأكيد الدفع مع ضغط الصورة
+// ============================================
+// ============================================
+// تأكيد الدفع مع ضغط الصورة (النسخة الصحيحة)
+// ============================================
+// ============================================
+// تأكيد الدفع مع ضغط الصورة
+// ============================================
 async function confirmPayment() {
     const transactionRef = document.getElementById('transactionRef')?.value.trim();
     const paymentProof = document.getElementById('paymentProof')?.files[0];
@@ -499,11 +508,10 @@ async function confirmPayment() {
         return;
     }
     
-    // الحد الأقصى للحجم 2 ميجابايت (لأن Base64 يزيد الحجم)
-    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    const MAX_SIZE = 5 * 1024 * 1024;
     
     if (paymentProof.size > MAX_SIZE) {
-        showToast('⚠️ حجم الصورة كبير جداً. الحد الأقصى 2 ميجابايت', 'error');
+        showToast('⚠️ حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت', 'error');
         return;
     }
     
@@ -514,63 +522,120 @@ async function confirmPayment() {
     }
     
     try {
-        showToast('📄 جاري تحميل الصورة...', '');
+        showToast('📄 جاري ضغط وتحويل الصورة...', '');
         
-        // تحويل الصورة إلى Base64 (بدون رفع إلى Storage)
+        let compressedFile = paymentProof;
+        
+        if (paymentProof.type.startsWith('image/')) {
+            compressedFile = await compressImage(paymentProof, 0.5, 800);
+        }
+        
         const proofBase64 = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result);
             reader.onerror = () => reject(new Error('فشل قراءة الملف'));
-            reader.readAsDataURL(paymentProof);
+            reader.readAsDataURL(compressedFile);
         });
         
-        showToast('💾 جاري حفظ الطلب...', '');
-        
-        // حفظ الطلب في Firestore فقط (بدون Storage)
-        const applicationData = {
-            userId: pendingApplication.userId,
-            userEmail: pendingApplication.userEmail,
-            userName: pendingApplication.userName,
-            jobId: pendingApplication.jobId,
-            jobTitle: pendingApplication.jobTitle,
-            jobCompany: pendingApplication.jobCompany,
-            jobCity: pendingApplication.jobCity,
-            transactionRef: transactionRef,
-            paymentProofBase64: proofBase64,  // تخزين الصورة كـ Base64
-            paymentProofName: paymentProof.name,
-            paymentProofSize: paymentProof.size,
-            paymentProofType: paymentProof.type,
-            walletUsed: window.selectedWallet || 'غير محدد',
-            amount: APPLICATION_FEE,
-            status: 'قيد المراجعة',
-            appliedAt: serverTimestamp(),
-            createdAt: serverTimestamp()
-        };
-        
-        await addDoc(collection(window.db, 'applications'), applicationData);
-        
-        // تنظيف البيانات المؤقتة
-        localStorage.removeItem('pendingApplication');
-        pendingApplication = null;
-        
-        showToast('🎉 تم تقديم طلبك بنجاح! طلبك قيد المراجعة، ستتلقى رسالة تأكيد فور الموافقة', 'success');
-        
-        closeModal('paymentModal');
-        
-        // عرض رسالة الطمأنة
-        setTimeout(() => {
-            showSuccessMessage();
-        }, 500);
+        if (proofBase64.length > 1000000) {
+            showToast('📄 الصورة لا تزال كبيرة، جاري ضغط إضافي...', '');
+            const moreCompressed = await compressImage(paymentProof, 0.3, 600);
+            const proofBase64Final = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+                reader.readAsDataURL(moreCompressed);
+            });
+            
+            if (proofBase64Final.length > 1000000) {
+                throw new Error('الصورة كبيرة جداً. يرجى استخدام صورة أصغر (أقل من 500KB)');
+            }
+            
+            await saveApplicationToFirestore(proofBase64Final, compressedFile.name);
+        } else {
+            await saveApplicationToFirestore(proofBase64, compressedFile.name);
+        }
         
     } catch (error) {
         console.error('خطأ:', error);
-        showToast('❌ فشل إرسال الطلب: ' + error.message, 'error');
+        showToast('❌ ' + (error.message || 'فشل إرسال الطلب'), 'error');
         
         if (confirmBtn) {
             confirmBtn.disabled = false;
             confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> تأكيد الدفع وإرسال الطلب';
         }
     }
+}
+
+// دالة ضغط الصورة
+function compressImage(file, quality = 0.5, maxWidth = 800) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob((blob) => {
+                    const compressedFile = new File([blob], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    resolve(compressedFile);
+                }, 'image/jpeg', quality);
+            };
+            img.onerror = reject;
+        };
+        reader.onerror = reject;
+    });
+}
+
+// دالة حفظ الطلب في Firestore
+async function saveApplicationToFirestore(proofBase64, fileName) {
+    showToast('💾 جاري حفظ الطلب...', '');
+    
+    const applicationData = {
+        userId: pendingApplication.userId,
+        userEmail: pendingApplication.userEmail,
+        userName: pendingApplication.userName,
+        jobId: pendingApplication.jobId,
+        jobTitle: pendingApplication.jobTitle,
+        jobCompany: pendingApplication.jobCompany,
+        jobCity: pendingApplication.jobCity,
+        transactionRef: document.getElementById('transactionRef').value.trim(),
+        paymentProofBase64: proofBase64,
+        paymentProofName: fileName,
+        paymentProofSize: proofBase64.length,
+        walletUsed: window.selectedWallet || 'غير محدد',
+        amount: APPLICATION_FEE,
+        status: 'قيد المراجعة',
+        appliedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+    };
+    
+    await addDoc(collection(window.db, 'applications'), applicationData);
+    
+    localStorage.removeItem('pendingApplication');
+    pendingApplication = null;
+    
+    showToast('🎉 تم تقديم طلبك بنجاح! طلبك قيد المراجعة', 'success');
+    closeModal('paymentModal');
+    
+    setTimeout(() => showSuccessMessage(), 500);
 }
 
 // ============================================
@@ -600,7 +665,6 @@ function showSuccessMessage() {
     document.body.insertAdjacentHTML('beforeend', messageHTML);
     document.getElementById('successModal').classList.add('active');
     
-    // إغلاق تلقائي بعد 5 ثواني
     setTimeout(() => {
         const modal = document.getElementById('successModal');
         if (modal) modal.classList.remove('active');
@@ -618,7 +682,7 @@ function checkPendingApplication() {
 }
 
 // ============================================
-// باقي الدوال (البحث، الفلاتر، المصادقة، إلخ)
+// باقي الدوال
 // ============================================
 function toggleSaveJob(jobId) {
     const jobIdStr = String(jobId);
@@ -826,7 +890,7 @@ async function handleLogout() {
     if (window.firebaseReady && window.auth) {
         try {
             await signOut(window.auth);
-        } catch (e) { /* ignore */ }
+        } catch (e) { }
     }
     currentUser = null;
     localStorage.removeItem('pendingApplication');
@@ -874,7 +938,7 @@ function showToast(message, type = '') {
 }
 
 // ============================================
-// MOBILE MENU
+// MOBILE MENU & OTHERS
 // ============================================
 function setupMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
@@ -953,15 +1017,13 @@ async function init() {
         });
     }
 
-    console.log('🚀 شغلي - موقع التوظيف اليمني جاهز للعمل');
-    console.log('📊 عدد الوظائف:', allJobs.length);
-    console.log('🔥 Firebase:', window.firebaseReady ? 'متصل' : 'غير متصل');
+    console.log('🚀 شغلي جاهز للعمل');
 }
 
 document.addEventListener('DOMContentLoaded', init);
 
 // ============================================
-// تعريض الدوال للنطاق العام
+// EXPOSE FUNCTIONS
 // ============================================
 window.searchJobs = searchJobs;
 window.applyFilters = applyFilters;
