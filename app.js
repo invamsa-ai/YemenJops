@@ -3,7 +3,7 @@
 // ============================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -38,7 +38,7 @@ window.storage = storage;
 window.firebaseApp = app;
 
 // ============================================
-// البيانات الثابتة للتصنيفات والمدن
+// البيانات الثابتة
 // ============================================
 const yemeniCities = [
     'صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'المكلا', 'سيئون',
@@ -62,6 +62,16 @@ const jobCategories = [
     { name: 'الزراعة', icon: 'fa-seedling' },
 ];
 
+// بيانات المحافظ الإلكترونية
+const wallets = {
+    'جوال': { name: 'جوال - Mobile Money', number: '770123456', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=770123456', recipient: 'شغلي للتشغيل والخدمات' },
+    'كاش': { name: 'كاش - Cash', number: '780123456', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=780123456', recipient: 'شغلي للتشغيل والخدمات' },
+    'جيب': { name: 'جيب - Jeeb', number: '790123456', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=790123456', recipient: 'شغلي للتشغيل والخدمات' },
+    'فلوسك': { name: 'فلوسك - Floosak', number: '771234567', qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=771234567', recipient: 'شغلي للتشغيل والخدمات' }
+};
+
+const APPLICATION_FEE = 1000; // 1000 ريال يمني
+
 // ============================================
 // STATE MANAGEMENT
 // ============================================
@@ -69,6 +79,7 @@ let allJobs = [];
 let filteredJobs = [];
 let currentUser = null;
 let savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+let pendingApplication = JSON.parse(localStorage.getItem('pendingApplication') || 'null');
 
 // ============================================
 // FIREBASE OPERATIONS
@@ -95,22 +106,6 @@ async function fetchJobsFromFirebase() {
     }
 }
 
-async function addJobToFirebase(jobData) {
-    if (!window.firebaseReady || !window.db) return null;
-    
-    try {
-        const docRef = await addDoc(collection(window.db, 'jobs'), {
-            ...jobData,
-            postedAt: serverTimestamp(),
-            createdAt: serverTimestamp()
-        });
-        return { id: docRef.id, ...jobData };
-    } catch (error) {
-        console.warn('خطأ في إضافة الوظيفة:', error.message);
-        return null;
-    }
-}
-
 // ============================================
 // RENDER FUNCTIONS
 // ============================================
@@ -119,7 +114,7 @@ function renderCategories() {
     if (!grid) return;
     
     grid.innerHTML = jobCategories.map(cat => `
-        <a href="#" class="category-card" onclick="filterByCategory('${cat.name}'); return false;" title="وظائف ${cat.name} في اليمن">
+        <a href="#" class="category-card" onclick="filterByCategory('${cat.name}'); return false;">
             <div class="cat-icon"><i class="fas ${cat.icon}"></i></div>
             <div class="cat-name">${cat.name}</div>
             <div class="cat-count">${countJobsByCategory(cat.name)} وظيفة</div>
@@ -221,7 +216,7 @@ function renderEmployers() {
     }
     
     grid.innerHTML = employers.map(emp => `
-        <div class="employer-card" onclick="filterByEmployer('${emp.name}')" title="وظائف ${emp.name}">
+        <div class="employer-card" onclick="filterByEmployer('${emp.name}')">
             <div class="emp-logo">${emp.logo}</div>
             <h4>${emp.name}</h4>
             <p class="emp-jobs">${emp.jobs} وظيفة متاحة</p>
@@ -230,6 +225,9 @@ function renderEmployers() {
     `).join('');
 }
 
+// ============================================
+// عرض تفاصيل الوظيفة مع نظام الدفع
+// ============================================
 function viewJobDetail(jobId) {
     const job = allJobs.find(j => String(j.id) === String(jobId));
     if (!job) {
@@ -249,13 +247,9 @@ function viewJobDetail(jobId) {
         }
     }
     
-    // رقم بوت التيليجرام - يمكنك تغيير الرقم
-    const telegramNumber = "+967123456789"; // ضع رقم التيليجرام هنا
-    const telegramMessage = encodeURIComponent(`مرحباً، أرغب في التقديم على وظيفة: ${job.title}\nالشركة: ${job.company}\nالموقع: ${job.city}\n\nالاسم: ${currentUser?.displayName || ''}\nالبريد الإلكتروني: ${currentUser?.email || ''}\n\nتم إرفاق السيرة الذاتية.`);
-    
     const detailHTML = `
         <div class="modal-overlay active" id="jobDetailModal" onclick="if(event.target===this)closeModal('jobDetailModal')">
-            <div class="modal" style="max-width:600px;text-align:right;">
+            <div class="modal" style="max-width:650px;text-align:right;">
                 <button class="modal-close" onclick="closeModal('jobDetailModal')">&times;</button>
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
                     <div class="company-logo" style="width:56px;height:56px;font-size:1.3rem;">${job.logo || (job.company ? job.company.charAt(0) : 'ش')}</div>
@@ -276,26 +270,16 @@ function viewJobDetail(jobId) {
                 </div>
                 ${job.tags?.length ? `<div class="job-tags" style="margin-bottom:14px;">${job.tags.map(t => `<span class="job-tag">${t}</span>`).join('')}</div>` : ''}
                 
-                <!-- قسم التقديم عبر التيليجرام -->
-                <div style="background:linear-gradient(135deg, #0088cc, #00a3e0); padding:20px; border-radius:var(--radius-md); margin-bottom:14px; text-align:center; color:white;">
-                    <i class="fab fa-telegram-plane" style="font-size:48px; margin-bottom:10px;"></i>
-                    <h3 style="color:white; margin-bottom:10px;">📱 التقديم عبر تيليجرام</h3>
-                    <p style="margin-bottom:15px; opacity:0.95;">للتواصل مع جهة العمل، يرجى إرسال سيرتك الذاتية على تيليجرام</p>
-                    <div style="background:white; border-radius:12px; padding:12px; margin:10px 0;">
-                        <p style="color:#0088cc; font-size:1.2rem; font-weight:bold; margin:0;">
-                            <i class="fab fa-telegram"></i> @ShaghalniJobs
-                        </p>
-                        <p style="color:#666; font-size:0.8rem; margin:5px 0 0 0;">أو اضغط الزر أدناه للتواصل المباشر</p>
-                    </div>
-                    <a href="https://t.me/ShaghalniJobs" target="_blank" class="btn" style="background:white; color:#0088cc; border-radius:30px; padding:10px 25px; margin-top:10px; display:inline-block; text-decoration:none; font-weight:bold;">
-                        <i class="fab fa-telegram"></i> تواصل الآن عبر تيليجرام
-                    </a>
-                </div>
-                
                 <div id="loginPrompt" style="display:${currentUser ? 'none' : 'block'};text-align:center; background:#f0f0f0; padding:15px; border-radius:var(--radius-sm);">
-                    <p style="margin-bottom:10px;color:var(--text-light);"><i class="fas fa-info-circle"></i> يرجى تسجيل الدخول لعرض معلومات التواصل</p>
+                    <p style="margin-bottom:10px;color:var(--text-light);"><i class="fas fa-info-circle"></i> يرجى تسجيل الدخول للتقديم على الوظيفة</p>
                     <button class="btn btn-primary" onclick="closeModal('jobDetailModal');setTimeout(()=>openModal('loginModal'),300);">
                         <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    </button>
+                </div>
+                
+                <div id="applySection" style="display:${currentUser ? 'block' : 'none'};">
+                    <button class="btn btn-primary btn-block btn-lg" onclick="startApplication('${jobIdStr}')" style="background:linear-gradient(135deg, #0088cc, #00a3e0);">
+                        <i class="fas fa-paper-plane"></i> التقدم للوظيفة (رسوم التقديم ${APPLICATION_FEE} ريال)
                     </button>
                 </div>
                 
@@ -313,10 +297,11 @@ function viewJobDetail(jobId) {
 }
 
 // ============================================
-// TELEGRAM APPLICATION (بدلاً من رفع الملفات)
+// بدء عملية التقديم والدفع
 // ============================================
-async function applyViaTelegram(jobId) {
+async function startApplication(jobId) {
     const job = allJobs.find(j => String(j.id) === String(jobId));
+    if (!job) return;
     
     if (!currentUser) {
         showToast('يرجى تسجيل الدخول أولاً', 'error');
@@ -325,34 +310,312 @@ async function applyViaTelegram(jobId) {
         return;
     }
     
-    // حفظ طلب التقديم في Firestore
+    // حفظ بيانات الطلب المعلق
+    pendingApplication = {
+        jobId: String(jobId),
+        jobTitle: job.title,
+        jobCompany: job.company,
+        jobCity: job.city,
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم',
+        timestamp: Date.now()
+    };
+    localStorage.setItem('pendingApplication', JSON.stringify(pendingApplication));
+    
+    closeModal('jobDetailModal');
+    setTimeout(() => showPaymentModal(), 300);
+}
+
+// ============================================
+// عرض نموذج الدفع
+// ============================================
+function showPaymentModal() {
+    if (!pendingApplication) {
+        showToast('لا توجد طلبات معلقة', 'error');
+        return;
+    }
+    
+    const walletsHTML = Object.entries(wallets).map(([key, wallet]) => `
+        <div class="wallet-option" onclick="showWalletDetails('${key}')" style="cursor:pointer; text-align:center; padding:15px; border:2px solid var(--border); border-radius:var(--radius-md); transition:all 0.3s; background:white;">
+            <i class="fas fa-wallet" style="font-size:32px; color:var(--primary);"></i>
+            <h4 style="margin:8px 0 0 0;">${wallet.name}</h4>
+        </div>
+    `).join('');
+    
+    const paymentHTML = `
+        <div class="modal-overlay active" id="paymentModal" onclick="if(event.target===this)closeModal('paymentModal')">
+            <div class="modal" style="max-width:550px;text-align:right;">
+                <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+                <h2 style="text-align:center;"><i class="fas fa-credit-card"></i> إتمام التقديم</h2>
+                
+                <!-- بطاقة بيانات الطلب -->
+                <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; padding:20px; border-radius:var(--radius-md); margin-bottom:20px;">
+                    <h3 style="color:white; margin-bottom:15px;">📋 تفاصيل طلبك</h3>
+                    <p><i class="fas fa-briefcase"></i> <strong>الوظيفة:</strong> ${pendingApplication.jobTitle}</p>
+                    <p><i class="fas fa-building"></i> <strong>الشركة:</strong> ${pendingApplication.jobCompany}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> <strong>المدينة:</strong> ${pendingApplication.jobCity}</p>
+                    <p><i class="fas fa-user"></i> <strong>مقدم الطلب:</strong> ${pendingApplication.userName}</p>
+                    <p><i class="fas fa-envelope"></i> <strong>البريد:</strong> ${pendingApplication.userEmail}</p>
+                    <hr style="border-color:rgba(255,255,255,0.3); margin:15px 0;">
+                    <div style="font-size:1.5rem; text-align:center;">
+                        <strong>المبلغ المطلوب:</strong> <span style="font-size:2rem;">${APPLICATION_FEE.toLocaleString()}</span> ريال يمني
+                    </div>
+                </div>
+                
+                <!-- اختيار المحفظة -->
+                <div style="margin-bottom:20px;">
+                    <h4 style="margin-bottom:15px;"><i class="fas fa-exchange-alt"></i> اختر طريقة الدفع:</h4>
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
+                        ${walletsHTML}
+                    </div>
+                </div>
+                
+                <!-- تفاصيل المحفظة (تظهر عند الاختيار) -->
+                <div id="walletDetails" style="display:none; background:var(--bg-gray); padding:15px; border-radius:var(--radius-md); margin-bottom:20px;">
+                    <div id="walletDetailsContent"></div>
+                </div>
+                
+                <!-- نموذج تأكيد الدفع -->
+                <div id="confirmPaymentSection" style="display:none;">
+                    <div class="form-group">
+                        <label><i class="fas fa-hashtag"></i> رقم العملية / الرقم المرجعي <span style="color:red;">*</span></label>
+                        <input type="text" id="transactionRef" class="form-input" placeholder="أدخل رقم العملية من تطبيق المحفظة" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-image"></i> إرفاق صورة إشعار التحويل <span style="color:red;">*</span></label>
+                        <input type="file" id="paymentProof" accept="image/*,.pdf" class="form-input">
+                        <small style="color:var(--text-muted);">صورة من عملية التحويل (jpg, png, pdf)</small>
+                    </div>
+                    <button class="btn btn-primary btn-block btn-lg" onclick="confirmPayment()" id="confirmPaymentBtn">
+                        <i class="fas fa-check-circle"></i> تأكيد الدفع وإرسال الطلب
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existing = document.getElementById('paymentModal');
+    if (existing) existing.remove();
+    document.body.insertAdjacentHTML('beforeend', paymentHTML);
+    document.getElementById('paymentModal').classList.add('active');
+}
+
+// ============================================
+// عرض تفاصيل المحفظة المختارة
+// ============================================
+function showWalletDetails(walletKey) {
+    const wallet = wallets[walletKey];
+    if (!wallet) return;
+    
+    const walletDetailsDiv = document.getElementById('walletDetails');
+    const walletDetailsContent = document.getElementById('walletDetailsContent');
+    const confirmSection = document.getElementById('confirmPaymentSection');
+    
+    walletDetailsContent.innerHTML = `
+        <h4 style="margin-bottom:15px;"><i class="fas fa-university"></i> بيانات الدفع عبر ${wallet.name}</h4>
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${wallet.qrCode}" alt="QR Code" style="width:150px; height:150px; border-radius:12px; margin-bottom:10px;">
+            <div>
+                <button class="btn btn-outline btn-sm" onclick="copyToClipboard('${wallet.number}')" style="margin-top:5px;">
+                    <i class="fas fa-copy"></i> تحميل الباركود
+                </button>
+            </div>
+        </div>
+        <div style="background:white; padding:12px; border-radius:var(--radius-sm); margin-bottom:10px;">
+            <p><strong><i class="fas fa-user-circle"></i> المستفيد:</strong> ${wallet.recipient}</p>
+            <p><strong><i class="fas fa-mobile-alt"></i> رقم المحفظة:</strong> ${wallet.number}</p>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn btn-primary btn-sm" onclick="copyToClipboard('${wallet.number}')" style="flex:1;">
+                    <i class="fas fa-copy"></i> نسخ الرقم
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="downloadQRCode('${wallet.qrCode}', '${wallet.name}')" style="flex:1;">
+                    <i class="fas fa-download"></i> تحميل الباركود
+                </button>
+            </div>
+        </div>
+        <div style="background:#e8f5e9; padding:12px; border-radius:var(--radius-sm); text-align:center;">
+            <i class="fas fa-info-circle"></i> يرجى تحويل المبلغ <strong>${APPLICATION_FEE.toLocaleString()} ريال</strong> إلى الرقم أعلاه، ثم إدخال بيانات التحويل بالأسفل
+        </div>
+    `;
+    
+    walletDetailsDiv.style.display = 'block';
+    confirmSection.style.display = 'block';
+    
+    // حفظ المحفظة المختارة
+    window.selectedWallet = walletKey;
+}
+
+// ============================================
+// نسخ النص للحافظة
+// ============================================
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
+    showToast('✅ تم نسخ الرقم بنجاح', 'success');
+}
+
+// ============================================
+// تحميل الباركود
+// ============================================
+function downloadQRCode(qrUrl, walletName) {
+    fetch(qrUrl)
+        .then(response => response.blob())
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `QR_${walletName}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ تم تحميل الباركود', 'success');
+        })
+        .catch(() => showToast('❌ فشل تحميل الباركود', 'error'));
+}
+
+// ============================================
+// تأكيد الدفع وإرسال الطلب
+// ============================================
+async function confirmPayment() {
+    const transactionRef = document.getElementById('transactionRef')?.value.trim();
+    const paymentProof = document.getElementById('paymentProof')?.files[0];
+    
+    if (!transactionRef) {
+        showToast('⚠️ يرجى إدخال رقم العملية', 'error');
+        return;
+    }
+    
+    if (!paymentProof) {
+        showToast('⚠️ يرجى إرفاق صورة إشعار التحويل', 'error');
+        return;
+    }
+    
+    if (!pendingApplication) {
+        showToast('⚠️ لا توجد بيانات طلب', 'error');
+        return;
+    }
+    
+    const confirmBtn = document.getElementById('confirmPaymentBtn');
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+    }
+    
     try {
-        await addDoc(collection(window.db, 'applicants'), {
-            userId: currentUser.uid,
-            userEmail: currentUser.email,
-            userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم',
-            jobId: String(jobId),
-            jobTitle: job?.title || '',
-            jobCompany: job?.company || '',
-            jobCity: job?.city || '',
-            applicationMethod: 'telegram',
-            status: 'تم التوجيه للتليجرام',
-            appliedAt: serverTimestamp()
-        });
+        showToast('📤 جاري رفع صورة التحويل...', '');
         
-        showToast('📱 سيتم توجيهك إلى تيليجرام لإرسال السيرة الذاتية', 'success');
+        // رفع صورة الإشعار
+        let proofUrl = '';
+        if (window.storage && firebaseReady) {
+            const fileName = `payment_proofs/${pendingApplication.userId}_${Date.now()}_${paymentProof.name}`;
+            const storageRef = ref(window.storage, fileName);
+            const uploadTask = uploadBytesResumable(storageRef, paymentProof);
+            
+            proofUrl = await new Promise((resolve, reject) => {
+                uploadTask.on('state_changed', null,
+                    (error) => reject(error),
+                    async () => {
+                        const url = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve(url);
+                    }
+                );
+            });
+        }
         
-        // فتح تيليجرام
+        showToast('💾 جاري حفظ الطلب...', '');
+        
+        // حفظ الطلب في قاعدة البيانات
+        const applicationData = {
+            userId: pendingApplication.userId,
+            userEmail: pendingApplication.userEmail,
+            userName: pendingApplication.userName,
+            jobId: pendingApplication.jobId,
+            jobTitle: pendingApplication.jobTitle,
+            jobCompany: pendingApplication.jobCompany,
+            jobCity: pendingApplication.jobCity,
+            transactionRef: transactionRef,
+            paymentProof: proofUrl,
+            walletUsed: window.selectedWallet || 'غير محدد',
+            amount: APPLICATION_FEE,
+            status: 'قيد المراجعة',
+            appliedAt: serverTimestamp(),
+            createdAt: serverTimestamp()
+        };
+        
+        await addDoc(collection(window.db, 'applications'), applicationData);
+        
+        // تنظيف البيانات المؤقتة
+        localStorage.removeItem('pendingApplication');
+        pendingApplication = null;
+        
+        showToast('🎉 تم تقديم طلبك بنجاح! طلبك قيد المراجعة، ستتلقى رسالة تأكيد فور الموافقة', 'success');
+        
+        closeModal('paymentModal');
+        
+        // عرض رسالة الطمأنة
         setTimeout(() => {
-            window.open('https://t.me/ShaghalniJobs', '_blank');
-        }, 1000);
+            showSuccessMessage();
+        }, 500);
         
     } catch (error) {
-        console.error(error);
-        showToast('❌ حدث خطأ، حاول مرة أخرى', 'error');
+        console.error('خطأ:', error);
+        showToast('❌ فشل إرسال الطلب: ' + error.message, 'error');
+        
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> تأكيد الدفع وإرسال الطلب';
+        }
     }
 }
 
+// ============================================
+// عرض رسالة الطمأنة
+// ============================================
+function showSuccessMessage() {
+    const messageHTML = `
+        <div class="modal-overlay active" id="successModal" onclick="if(event.target===this)closeModal('successModal')">
+            <div class="modal" style="max-width:450px; text-align:center;">
+                <button class="modal-close" onclick="closeModal('successModal')">&times;</button>
+                <div style="background:linear-gradient(135deg, #10b981, #059669); color:white; padding:30px; border-radius:var(--radius-md); margin:-20px -20px 20px -20px;">
+                    <i class="fas fa-check-circle" style="font-size:64px;"></i>
+                    <h2 style="color:white; margin-top:10px;">تم التقديم بنجاح!</h2>
+                </div>
+                <p style="font-size:1.1rem; margin-bottom:15px;">✅ طلبك قيد المراجعة</p>
+                <p style="color:var(--text-medium);">سيتم التواصل معك عبر رسالة نصية (SMS) فور تأكيد طلبك للوظيفة</p>
+                <hr style="margin:20px 0;">
+                <button class="btn btn-primary" onclick="closeModal('successModal')">
+                    <i class="fas fa-check"></i> حسناً
+                </button>
+            </div>
+        </div>
+    `;
+    
+    const existing = document.getElementById('successModal');
+    if (existing) existing.remove();
+    document.body.insertAdjacentHTML('beforeend', messageHTML);
+    document.getElementById('successModal').classList.add('active');
+    
+    // إغلاق تلقائي بعد 5 ثواني
+    setTimeout(() => {
+        const modal = document.getElementById('successModal');
+        if (modal) modal.classList.remove('active');
+    }, 5000);
+}
+
+// ============================================
+// استعادة الطلب المعلق بعد تحديث الصفحة
+// ============================================
+function checkPendingApplication() {
+    if (pendingApplication && currentUser && pendingApplication.userId === currentUser.uid) {
+        showToast('📋 يوجد طلب قيد الإكمال، استكمل عملية الدفع', '');
+        setTimeout(() => showPaymentModal(), 1000);
+    }
+}
+
+// ============================================
+// باقي الدوال (البحث، الفلاتر، المصادقة، إلخ)
+// ============================================
 function toggleSaveJob(jobId) {
     const jobIdStr = String(jobId);
     if (savedJobs.includes(jobIdStr)) {
@@ -366,9 +629,6 @@ function toggleSaveJob(jobId) {
     renderJobs(filteredJobs);
 }
 
-// ============================================
-// SEARCH & FILTER
-// ============================================
 function searchJobs() {
     const keyword = (document.getElementById('searchKeyword')?.value || '').toLowerCase().trim();
     const city = document.getElementById('searchCity')?.value || '';
@@ -480,6 +740,7 @@ async function handleLogin(event) {
             showToast(`مرحباً بعودتك! 👋`, 'success');
             closeModal('loginModal');
             updateNavForLoggedInUser();
+            checkPendingApplication();
         } catch (error) {
             console.error('خطأ في تسجيل الدخول:', error);
             if (error.code === 'auth/invalid-credential') {
@@ -564,6 +825,8 @@ async function handleLogout() {
         } catch (e) { /* ignore */ }
     }
     currentUser = null;
+    localStorage.removeItem('pendingApplication');
+    pendingApplication = null;
     showToast('تم تسجيل الخروج بنجاح', '');
     location.reload();
 }
@@ -629,9 +892,6 @@ function setupMobileMenu() {
     }
 }
 
-// ============================================
-// NAVBAR SCROLL EFFECT
-// ============================================
 function setupNavbarScroll() {
     const navbar = document.getElementById('navbar');
     if (!navbar) return;
@@ -644,9 +904,6 @@ function setupNavbarScroll() {
     });
 }
 
-// ============================================
-// KEYBOARD SUPPORT
-// ============================================
 function setupKeyboardShortcuts() {
     const searchInputs = ['searchKeyword', 'filterMinSalary'];
     searchInputs.forEach(id => {
@@ -685,6 +942,7 @@ async function init() {
             if (user) {
                 currentUser = user;
                 updateNavForLoggedInUser();
+                checkPendingApplication();
             } else {
                 currentUser = null;
             }
@@ -712,7 +970,11 @@ window.closeModal = closeModal;
 window.switchModal = switchModal;
 window.viewJobDetail = viewJobDetail;
 window.toggleSaveJob = toggleSaveJob;
-window.applyViaTelegram = applyViaTelegram;
+window.startApplication = startApplication;
+window.showWalletDetails = showWalletDetails;
+window.copyToClipboard = copyToClipboard;
+window.downloadQRCode = downloadQRCode;
+window.confirmPayment = confirmPayment;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
 window.handleLogout = handleLogout;
