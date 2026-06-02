@@ -2,7 +2,8 @@
 // FIREBASE IMPORTS & CONFIGURATION
 // ============================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAyWmacChzw5Wl-D_YkEObJw74qliw8OQs",
@@ -14,42 +15,41 @@ const firebaseConfig = {
     measurementId: "G-SW6K435LB1"
 };
 
-let app, db;
+let app, db, auth;
 let firebaseReady = false;
+let isLoggedIn = false;
 
 try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
+    auth = getAuth(app);
     firebaseReady = true;
-    console.log("✅ Firebase Admin متصل بنجاح");
+    console.log("✅ Firebase متصل بنجاح");
 } catch (error) {
-    console.warn("⚠️ Firebase Admin غير متصل:", error.message);
+    console.warn("⚠️ Firebase غير متصل:", error.message);
     firebaseReady = false;
 }
 
 // ============================================
-// ADMIN CREDENTIALS
+// ADMIN CREDENTIALS (للخيار المحلي فقط)
 // ============================================
-const ADMIN_CREDENTIALS = {
-    email: 'yemen@job.com',
-    password: 'admin1112004admin'
-};
+const ADMIN_EMAIL = 'yemen@job.com';
+const ADMIN_PASSWORD = 'admin1112004admin';
 
 // ============================================
 // STATE MANAGEMENT
 // ============================================
 let adminJobs = [];
-let adminApplicants = [];
+let adminApplications = []; // تغيير من applicants إلى applications
 let adminCompanies = [];
-let isLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
 
 // ============================================
 // FIREBASE OPERATIONS
 // ============================================
 
-// جلب جميع الوظائف من Firestore
-async function fetchJobsFromFirestore() {
-    if (!firebaseReady) {
+// جلب جميع الوظائف
+async function fetchJobs() {
+    if (!firebaseReady || !db) {
         return JSON.parse(localStorage.getItem('adminJobs') || '[]');
     }
     
@@ -68,9 +68,50 @@ async function fetchJobsFromFirestore() {
     }
 }
 
-// إضافة وظيفة إلى Firestore
-async function addJobToFirestore(jobData) {
-    if (!firebaseReady) {
+// جلب جميع الطلبات (applications) - هذا هو الجدول الجديد
+async function fetchApplications() {
+    if (!firebaseReady || !db) {
+        return JSON.parse(localStorage.getItem('adminApplications') || '[]');
+    }
+    
+    try {
+        const appsRef = collection(db, 'applications');
+        const q = query(appsRef, orderBy('appliedAt', 'desc'));
+        const snapshot = await getDocs(q);
+        const applications = [];
+        snapshot.forEach(doc => {
+            applications.push({ id: doc.id, ...doc.data() });
+        });
+        return applications;
+    } catch (error) {
+        console.error('خطأ في جلب الطلبات:', error);
+        return JSON.parse(localStorage.getItem('adminApplications') || '[]');
+    }
+}
+
+// جلب جميع الشركات
+async function fetchCompanies() {
+    if (!firebaseReady || !db) {
+        return JSON.parse(localStorage.getItem('adminCompanies') || '[]');
+    }
+    
+    try {
+        const companiesRef = collection(db, 'companies');
+        const snapshot = await getDocs(companiesRef);
+        const companies = [];
+        snapshot.forEach(doc => {
+            companies.push({ id: doc.id, ...doc.data() });
+        });
+        return companies;
+    } catch (error) {
+        console.error('خطأ في جلب الشركات:', error);
+        return JSON.parse(localStorage.getItem('adminCompanies') || '[]');
+    }
+}
+
+// إضافة وظيفة
+async function addJob(jobData) {
+    if (!firebaseReady || !db) {
         const newJob = { ...jobData, id: Date.now().toString() };
         const localJobs = JSON.parse(localStorage.getItem('adminJobs') || '[]');
         localJobs.unshift(newJob);
@@ -91,9 +132,9 @@ async function addJobToFirestore(jobData) {
     }
 }
 
-// تحديث وظيفة في Firestore
-async function updateJobInFirestore(jobId, jobData) {
-    if (!firebaseReady) {
+// تحديث وظيفة
+async function updateJob(jobId, jobData) {
+    if (!firebaseReady || !db) {
         const localJobs = JSON.parse(localStorage.getItem('adminJobs') || '[]');
         const index = localJobs.findIndex(j => j.id === jobId);
         if (index >= 0) {
@@ -105,10 +146,7 @@ async function updateJobInFirestore(jobId, jobData) {
     
     try {
         const jobRef = doc(db, 'jobs', jobId);
-        await updateDoc(jobRef, {
-            ...jobData,
-            updatedAt: serverTimestamp()
-        });
+        await updateDoc(jobRef, { ...jobData, updatedAt: serverTimestamp() });
         return true;
     } catch (error) {
         console.error('خطأ في تحديث الوظيفة:', error);
@@ -116,9 +154,9 @@ async function updateJobInFirestore(jobId, jobData) {
     }
 }
 
-// حذف وظيفة من Firestore
-async function deleteJobFromFirestore(jobId) {
-    if (!firebaseReady) {
+// حذف وظيفة
+async function deleteJob(jobId) {
+    if (!firebaseReady || !db) {
         let localJobs = JSON.parse(localStorage.getItem('adminJobs') || '[]');
         localJobs = localJobs.filter(j => j.id !== jobId);
         localStorage.setItem('adminJobs', JSON.stringify(localJobs));
@@ -134,90 +172,56 @@ async function deleteJobFromFirestore(jobId) {
     }
 }
 
-// جلب المتقدمين من Firestore
-async function fetchApplicantsFromFirestore() {
-    if (!firebaseReady) {
-        return JSON.parse(localStorage.getItem('adminApplicants') || '[]');
-    }
-    
-    try {
-        const applicantsRef = collection(db, 'applicants');
-        const q = query(applicantsRef, orderBy('appliedAt', 'desc'));
-        const snapshot = await getDocs(q);
-        const applicants = [];
-        snapshot.forEach(doc => {
-            applicants.push({ id: doc.id, ...doc.data() });
-        });
-        return applicants;
-    } catch (error) {
-        console.error('خطأ في جلب المتقدمين:', error);
-        return JSON.parse(localStorage.getItem('adminApplicants') || '[]');
-    }
-}
-
-// تحديث حالة متقدم في Firestore
-async function updateApplicantInFirestore(applicantId, data) {
-    if (!firebaseReady) {
-        const localApps = JSON.parse(localStorage.getItem('adminApplicants') || '[]');
-        const index = localApps.findIndex(a => a.id === applicantId);
+// تحديث حالة طلب (application)
+async function updateApplicationStatus(applicationId, newStatus, notes = '') {
+    if (!firebaseReady || !db) {
+        const localApps = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+        const index = localApps.findIndex(a => a.id === applicationId);
         if (index >= 0) {
-            localApps[index] = { ...localApps[index], ...data };
-            localStorage.setItem('adminApplicants', JSON.stringify(localApps));
+            localApps[index].status = newStatus;
+            if (notes) localApps[index].adminNotes = notes;
+            localApps[index].reviewedAt = new Date().toISOString();
+            localStorage.setItem('adminApplications', JSON.stringify(localApps));
         }
         return true;
     }
     
     try {
-        const appRef = doc(db, 'applicants', applicantId);
-        await updateDoc(appRef, data);
+        const appRef = doc(db, 'applications', applicationId);
+        const updateData = { 
+            status: newStatus, 
+            reviewedAt: serverTimestamp() 
+        };
+        if (notes) updateData.adminNotes = notes;
+        await updateDoc(appRef, updateData);
         return true;
     } catch (error) {
-        console.error('خطأ في تحديث المتقدم:', error);
+        console.error('خطأ في تحديث حالة الطلب:', error);
         return false;
     }
 }
 
-// حذف متقدم من Firestore
-async function deleteApplicantFromFirestore(applicantId) {
-    if (!firebaseReady) {
-        let localApps = JSON.parse(localStorage.getItem('adminApplicants') || '[]');
-        localApps = localApps.filter(a => a.id !== applicantId);
-        localStorage.setItem('adminApplicants', JSON.stringify(localApps));
+// حذف طلب
+async function deleteApplication(applicationId) {
+    if (!firebaseReady || !db) {
+        let localApps = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+        localApps = localApps.filter(a => a.id !== applicationId);
+        localStorage.setItem('adminApplications', JSON.stringify(localApps));
         return true;
     }
     
     try {
-        await deleteDoc(doc(db, 'applicants', applicantId));
+        await deleteDoc(doc(db, 'applications', applicationId));
         return true;
     } catch (error) {
-        console.error('خطأ في حذف المتقدم:', error);
+        console.error('خطأ في حذف الطلب:', error);
         return false;
     }
 }
 
-// جلب الشركات من Firestore
-async function fetchCompaniesFromFirestore() {
-    if (!firebaseReady) {
-        return JSON.parse(localStorage.getItem('adminCompanies') || '[]');
-    }
-    
-    try {
-        const companiesRef = collection(db, 'companies');
-        const snapshot = await getDocs(companiesRef);
-        const companies = [];
-        snapshot.forEach(doc => {
-            companies.push({ id: doc.id, ...doc.data() });
-        });
-        return companies;
-    } catch (error) {
-        console.error('خطأ في جلب الشركات:', error);
-        return JSON.parse(localStorage.getItem('adminCompanies') || '[]');
-    }
-}
-
-// إضافة شركة إلى Firestore
-async function addCompanyToFirestore(companyData) {
-    if (!firebaseReady) {
+// إضافة شركة
+async function addCompany(companyData) {
+    if (!firebaseReady || !db) {
         const newCompany = { ...companyData, id: Date.now().toString() };
         const localCompanies = JSON.parse(localStorage.getItem('adminCompanies') || '[]');
         localCompanies.push(newCompany);
@@ -237,9 +241,9 @@ async function addCompanyToFirestore(companyData) {
     }
 }
 
-// حذف شركة من Firestore
-async function deleteCompanyFromFirestore(companyId) {
-    if (!firebaseReady) {
+// حذف شركة
+async function deleteCompany(companyId) {
+    if (!firebaseReady || !db) {
         let localCompanies = JSON.parse(localStorage.getItem('adminCompanies') || '[]');
         localCompanies = localCompanies.filter(c => c.id !== companyId);
         localStorage.setItem('adminCompanies', JSON.stringify(localCompanies));
@@ -256,38 +260,67 @@ async function deleteCompanyFromFirestore(companyId) {
 }
 
 // ============================================
-// AUTHENTICATION
+// AUTHENTICATION (باستخدام Firebase Auth)
 // ============================================
-function handleAdminLogin(event) {
+async function handleAdminLogin(event) {
     event.preventDefault();
     
-    const email = document.getElementById('adminEmail').value.trim();
-    const password = document.getElementById('adminPassword').value;
+    const email = document.getElementById('adminEmail')?.value.trim();
+    const password = document.getElementById('adminPassword')?.value;
     
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        sessionStorage.setItem('adminLoggedIn', 'true');
-        showToast('تم تسجيل الدخول بنجاح! 🎉', 'success');
-        
-        if (document.getElementById('rememberMe')?.checked) {
-            localStorage.setItem('adminRemembered', 'true');
+    if (!email || !password) {
+        showToast('يرجى إدخال البريد الإلكتروني وكلمة المرور', 'error');
+        return;
+    }
+    
+    if (!firebaseReady || !auth) {
+        // وضع التخزين المحلي
+        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+            sessionStorage.setItem('adminLoggedIn', 'true');
+            showToast('تم تسجيل الدخول بنجاح (وضع محلي)! 🎉', 'success');
+            setTimeout(() => {
+                window.location.href = 'admin-dashboard.html';
+            }, 800);
+        } else {
+            showToast('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
         }
-        
+        return;
+    }
+    
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        sessionStorage.setItem('adminLoggedIn', 'true');
+        sessionStorage.setItem('adminUid', userCredential.user.uid);
+        showToast('تم تسجيل الدخول بنجاح! 🎉', 'success');
         setTimeout(() => {
             window.location.href = 'admin-dashboard.html';
         }, 800);
-    } else {
-        showToast('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
+    } catch (error) {
+        console.error('خطأ في تسجيل الدخول:', error);
+        if (error.code === 'auth/invalid-credential') {
+            showToast('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
+        } else {
+            showToast('فشل تسجيل الدخول: ' + error.message, 'error');
+        }
     }
 }
 
 function checkAdminAuth() {
+    isLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
+    
     if (!isLoggedIn && !window.location.href.includes('admin-login.html')) {
         window.location.href = 'admin-login.html';
     }
 }
 
-function handleAdminLogout() {
+async function handleAdminLogout() {
+    if (firebaseReady && auth) {
+        try {
+            await signOut(auth);
+        } catch (e) { /* ignore */ }
+    }
     sessionStorage.removeItem('adminLoggedIn');
+    sessionStorage.removeItem('adminUid');
     showToast('تم تسجيل الخروج بنجاح', 'success');
     setTimeout(() => {
         window.location.href = 'admin-login.html';
@@ -295,20 +328,20 @@ function handleAdminLogout() {
 }
 
 // ============================================
-// TOGGLE PASSWORD VISIBILITY
+// TOGGLE PASSWORD
 // ============================================
 function togglePasswordVisibility() {
     const passwordInput = document.getElementById('adminPassword');
     const icon = document.querySelector('.toggle-password i');
     
-    if (passwordInput.type === 'password') {
+    if (passwordInput?.type === 'password') {
         passwordInput.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
+        icon?.classList.remove('fa-eye');
+        icon?.classList.add('fa-eye-slash');
+    } else if (passwordInput) {
         passwordInput.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
+        icon?.classList.remove('fa-eye-slash');
+        icon?.classList.add('fa-eye');
     }
 }
 
@@ -334,14 +367,12 @@ async function switchPage(pageName, navItem) {
     document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
     
     const pageElement = document.getElementById(`${pageName}-page`);
-    if (pageElement) {
-        pageElement.classList.add('active');
-    }
+    if (pageElement) pageElement.classList.add('active');
     
     const titles = {
         'dashboard': 'لوحة التحكم',
         'jobs': 'إدارة الوظائف',
-        'applicants': 'إدارة المتقدمين',
+        'applications': 'طلبات التقديم',  // تغيير من applicants
         'companies': 'إدارة الشركات',
         'settings': 'الإعدادات'
     };
@@ -350,7 +381,7 @@ async function switchPage(pageName, navItem) {
     
     if (pageName === 'dashboard') await loadDashboard();
     if (pageName === 'jobs') await loadJobsTable();
-    if (pageName === 'applicants') await loadApplicantsTable();
+    if (pageName === 'applications') await loadApplicationsTable();
     if (pageName === 'companies') await loadCompaniesTable();
 }
 
@@ -358,21 +389,23 @@ async function switchPage(pageName, navItem) {
 // DASHBOARD
 // ============================================
 async function loadDashboard() {
-    // جلب البيانات من Firestore
-    adminJobs = await fetchJobsFromFirestore();
-    adminApplicants = await fetchApplicantsFromFirestore();
-    adminCompanies = await fetchCompaniesFromFirestore();
+    adminJobs = await fetchJobs();
+    adminApplications = await fetchApplications();
+    adminCompanies = await fetchCompanies();
     
     // تحديث الإحصائيات
     const totalJobsEl = document.getElementById('totalJobs');
     const totalApplicantsEl = document.getElementById('totalApplicants');
     const totalCompaniesEl = document.getElementById('totalCompanies');
-    const totalViewsEl = document.getElementById('totalViews');
+    const totalRevenueEl = document.getElementById('totalRevenue');
     
     if (totalJobsEl) totalJobsEl.textContent = adminJobs.length;
-    if (totalApplicantsEl) totalApplicantsEl.textContent = adminApplicants.length;
+    if (totalApplicantsEl) totalApplicantsEl.textContent = adminApplications.length;
     if (totalCompaniesEl) totalCompaniesEl.textContent = adminCompanies.length;
-    if (totalViewsEl) totalViewsEl.textContent = Math.floor(Math.random() * 500) + 100;
+    
+    // حساب إجمالي الإيرادات (1000 ريال لكل طلب)
+    const totalRevenue = adminApplications.length * 1000;
+    if (totalRevenueEl) totalRevenueEl.textContent = totalRevenue.toLocaleString() + ' ر.ي';
     
     // تحديث العدادات في الشريط الجانبي
     const jobsCountEl = document.getElementById('jobsCount');
@@ -380,7 +413,7 @@ async function loadDashboard() {
     const companiesCountEl = document.getElementById('companiesCount');
     
     if (jobsCountEl) jobsCountEl.textContent = adminJobs.length;
-    if (applicantsCountEl) applicantsCountEl.textContent = adminApplicants.length;
+    if (applicantsCountEl) applicantsCountEl.textContent = adminApplications.length;
     if (companiesCountEl) companiesCountEl.textContent = adminCompanies.length;
     
     // آخر الوظائف
@@ -392,8 +425,8 @@ async function loadDashboard() {
                 <div class="item-info">
                     <div class="item-icon"><i class="fas fa-briefcase"></i></div>
                     <div class="item-details">
-                        <h4>${job.title}</h4>
-                        <span>${job.company} - ${job.city}</span>
+                        <h4>${job.title || 'بدون عنوان'}</h4>
+                        <span>${job.company || 'غير محدد'} - ${job.city || ''}</span>
                     </div>
                 </div>
                 <span class="item-badge badge-new">${job.type || 'دوام كامل'}</span>
@@ -401,22 +434,22 @@ async function loadDashboard() {
         `).join('') || '<p style="text-align:center;color:var(--text-muted);">لا توجد وظائف بعد</p>';
     }
     
-    // آخر المتقدمين
-    const recentApplicants = [...adminApplicants].slice(-5).reverse();
-    const recentApplicantsList = document.getElementById('recentApplicantsList');
-    if (recentApplicantsList) {
-        recentApplicantsList.innerHTML = recentApplicants.map(app => `
+    // آخر الطلبات
+    const recentApps = [...adminApplications].slice(-5).reverse();
+    const recentAppsList = document.getElementById('recentApplicantsList');
+    if (recentAppsList) {
+        recentAppsList.innerHTML = recentApps.map(app => `
             <div class="recent-item">
                 <div class="item-info">
                     <div class="item-icon"><i class="fas fa-user"></i></div>
                     <div class="item-details">
-                        <h4>${app.name}</h4>
-                        <span>${app.jobTitle}</span>
+                        <h4>${app.userName || 'غير محدد'}</h4>
+                        <span>${app.jobTitle || 'غير محدد'}</span>
                     </div>
                 </div>
                 <span class="item-badge ${getStatusBadgeClass(app.status)}">${app.status || 'جديد'}</span>
             </div>
-        `).join('') || '<p style="text-align:center;color:var(--text-muted);">لا يوجد متقدمين بعد</p>';
+        `).join('') || '<p style="text-align:center;color:var(--text-muted);">لا يوجد طلبات بعد</p>';
     }
 }
 
@@ -434,7 +467,7 @@ function getStatusBadgeClass(status) {
 // JOBS MANAGEMENT
 // ============================================
 async function loadJobsTable() {
-    adminJobs = await fetchJobsFromFirestore();
+    adminJobs = await fetchJobs();
     
     const tbody = document.getElementById('jobsTableBody');
     if (!tbody) return;
@@ -447,10 +480,10 @@ async function loadJobsTable() {
     tbody.innerHTML = adminJobs.map((job, index) => `
         <tr>
             <td>${index + 1}</td>
-            <td><strong>${job.title}</strong></td>
-            <td>${job.company}</td>
-            <td>${job.city}</td>
-            <td>${job.category}</td>
+            <td><strong>${job.title || 'بدون عنوان'}</strong></td>
+            <td>${job.company || '-'}</td>
+            <td>${job.city || '-'}</td>
+            <td>${job.category || '-'}</td>
             <td>
                 ${job.urgent ? '<span class="item-badge badge-rejected">عاجل</span> ' : ''}
                 ${job.featured ? '<span class="item-badge badge-accepted">مميزة</span>' : ''}
@@ -461,7 +494,7 @@ async function loadJobsTable() {
                     <button class="btn-icon btn-edit" onclick="editJob('${job.id}')" title="تعديل">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-icon btn-delete" onclick="deleteJob('${job.id}')" title="حذف">
+                    <button class="btn-icon btn-delete" onclick="deleteJobHandler('${job.id}')" title="حذف">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -514,33 +547,29 @@ async function saveJob(event) {
         urgent: document.getElementById('jobUrgent').checked,
     };
     
+    let success;
     if (jobId) {
-        // تحديث وظيفة موجودة
-        const success = await updateJobInFirestore(jobId, jobData);
-        if (success) {
-            showToast('تم تحديث الوظيفة بنجاح ✅', 'success');
-        } else {
-            showToast('فشل تحديث الوظيفة', 'error');
-        }
+        success = await updateJob(jobId, jobData);
+        if (success) showToast('تم تحديث الوظيفة بنجاح ✅', 'success');
+        else showToast('فشل تحديث الوظيفة', 'error');
     } else {
-        // إضافة وظيفة جديدة
-        const newJob = await addJobToFirestore(jobData);
-        if (newJob) {
-            showToast('تم إضافة الوظيفة بنجاح 🎉', 'success');
-        } else {
-            showToast('فشل إضافة الوظيفة', 'error');
-        }
+        const newJob = await addJob(jobData);
+        success = !!newJob;
+        if (success) showToast('تم إضافة الوظيفة بنجاح 🎉', 'success');
+        else showToast('فشل إضافة الوظيفة', 'error');
     }
     
-    closeModal('jobModal');
-    await loadJobsTable();
-    await loadDashboard();
+    if (success) {
+        closeModal('jobModal');
+        await loadJobsTable();
+        await loadDashboard();
+    }
 }
 
-async function deleteJob(jobId) {
+async function deleteJobHandler(jobId) {
     if (!confirm('هل أنت متأكد من حذف هذه الوظيفة؟')) return;
     
-    const success = await deleteJobFromFirestore(jobId);
+    const success = await deleteJob(jobId);
     if (success) {
         showToast('تم حذف الوظيفة بنجاح', 'success');
         await loadJobsTable();
@@ -551,40 +580,41 @@ async function deleteJob(jobId) {
 }
 
 // ============================================
-// APPLICANTS MANAGEMENT
+// APPLICATIONS MANAGEMENT (الطلبات)
 // ============================================
-async function loadApplicantsTable() {
-    adminApplicants = await fetchApplicantsFromFirestore();
+async function loadApplicationsTable() {
+    adminApplications = await fetchApplications();
     
-    const tbody = document.getElementById('applicantsTableBody');
+    const tbody = document.getElementById('applicationsTableBody');
     if (!tbody) return;
     
-    if (adminApplicants.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">لا يوجد متقدمين بعد</td></tr>`;
+    if (adminApplications.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">لا يوجد طلبات تقديم بعد</td></tr>`;
         return;
     }
     
-    const filtered = getFilteredApplicants();
+    const filtered = getFilteredApplications();
     
     tbody.innerHTML = filtered.map((app, index) => `
         <tr>
             <td>${index + 1}</td>
-            <td><strong>${app.name}</strong></td>
-            <td>${app.jobTitle}</td>
-            <td>${app.email}</td>
-            <td>${app.appliedAt ? new Date(app.appliedAt.seconds ? app.appliedAt.seconds * 1000 : app.appliedAt).toLocaleDateString('ar') : 'غير محدد'}</td>
+            <td><strong>${app.userName || 'غير محدد'}</strong></td>
+            <td>${app.jobTitle || 'غير محدد'}</td>
+            <td>${app.userEmail || '-'}</td>
+            <td>${app.transactionRef || '-'}</td>
+            <td>${app.amount ? app.amount.toLocaleString() + ' ر.ي' : '1000 ر.ي'}</td>
             <td>
                 <span class="item-badge ${getStatusBadgeClass(app.status)}">${app.status || 'جديد'}</span>
             </td>
             <td>
                 <div class="table-actions">
-                    <button class="btn-icon btn-view" onclick="viewApplicant('${app.id}')" title="عرض">
+                    <button class="btn-icon btn-view" onclick="viewApplication('${app.id}')" title="عرض التفاصيل">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-icon btn-edit" onclick="updateApplicantStatus('${app.id}')" title="تغيير الحالة">
+                    <button class="btn-icon btn-edit" onclick="updateApplicationStatusModal('${app.id}')" title="تغيير الحالة">
                         <i class="fas fa-exchange-alt"></i>
                     </button>
-                    <button class="btn-icon btn-delete" onclick="deleteApplicant('${app.id}')" title="حذف">
+                    <button class="btn-icon btn-delete" onclick="deleteApplicationHandler('${app.id}')" title="حذف">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -593,23 +623,24 @@ async function loadApplicantsTable() {
     `).join('');
 }
 
-function getFilteredApplicants() {
+function getFilteredApplications() {
     const jobFilter = document.getElementById('filterApplicantJob')?.value || '';
     const statusFilter = document.getElementById('filterApplicantStatus')?.value || '';
     
-    return adminApplicants.filter(app => {
+    return adminApplications.filter(app => {
         if (jobFilter && app.jobTitle !== jobFilter) return false;
         if (statusFilter && app.status !== statusFilter) return false;
         return true;
     });
 }
 
-function filterApplicants() {
-    loadApplicantsTable();
+function filterApplications() {
+    loadApplicationsTable();
 }
 
-function viewApplicant(appId) {
-    const app = adminApplicants.find(a => a.id === appId);
+// عرض تفاصيل الطلب
+function viewApplication(appId) {
+    const app = adminApplications.find(a => a.id === appId);
     if (!app) return;
     
     const content = document.getElementById('applicantDetailContent');
@@ -619,41 +650,78 @@ function viewApplicant(appId) {
         ? new Date(app.appliedAt.seconds ? app.appliedAt.seconds * 1000 : app.appliedAt).toLocaleDateString('ar')
         : 'غير محدد';
     
-    // زر تحميل السيرة الذاتية
-    let cvDownloadButton = '';
-    if (app.cvBase64) {
-        cvDownloadButton = `
-            <a href="${app.cvBase64}" download="${app.cvFileName || 'السيرة_الذاتية.pdf'}" 
-               class="btn btn-primary" style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;">
-                <i class="fas fa-download"></i> تحميل السيرة الذاتية
-            </a>
+    // عرض صورة الإشعار إذا كانت موجودة
+    let proofImageHtml = '';
+    if (app.paymentProofBase64) {
+        proofImageHtml = `
+            <div style="margin-top:10px;">
+                <strong>صورة إشعار التحويل:</strong>
+                <div style="margin-top:8px;">
+                    <img src="${app.paymentProofBase64}" alt="إشعار التحويل" style="max-width:200px; border-radius:8px; border:1px solid #ddd;">
+                </div>
+                <div style="margin-top:5px;">
+                    <a href="${app.paymentProofBase64}" download="${app.paymentProofName || 'proof.png'}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-download"></i> تحميل الصورة
+                    </a>
+                </div>
+            </div>
+        `;
+    } else if (app.paymentProofUrl) {
+        proofImageHtml = `
+            <div style="margin-top:10px;">
+                <strong>صورة إشعار التحويل:</strong>
+                <div style="margin-top:8px;">
+                    <img src="${app.paymentProofUrl}" alt="إشعار التحويل" style="max-width:200px; border-radius:8px; border:1px solid #ddd;">
+                </div>
+                <div style="margin-top:5px;">
+                    <a href="${app.paymentProofUrl}" target="_blank" class="btn btn-outline btn-sm">
+                        <i class="fas fa-external-link-alt"></i> فتح الصورة
+                    </a>
+                </div>
+            </div>
         `;
     } else {
-        cvDownloadButton = '<p style="color:var(--text-muted);margin-top:10px;"><i class="fas fa-info-circle"></i> لم يتم رفع سيرة ذاتية</p>';
+        proofImageHtml = '<p style="color:var(--text-muted); margin-top:5px;"><i class="fas fa-info-circle"></i> لم يتم رفع صورة إشعار</p>';
     }
     
     content.innerHTML = `
-        <h3 style="margin-bottom:15px;">تفاصيل المتقدم</h3>
+        <h3 style="margin-bottom:15px;">📋 تفاصيل طلب التقديم</h3>
         <div style="background:var(--bg-gray);padding:20px;border-radius:var(--radius);">
-            <p><strong>الاسم:</strong> ${app.name || app.userName || 'غير محدد'}</p>
-            <p><strong>البريد:</strong> ${app.email || app.userEmail || 'غير محدد'}</p>
-            <p><strong>الهاتف:</strong> ${app.phone || 'غير متوفر'}</p>
-            <p><strong>الوظيفة:</strong> ${app.jobTitle}</p>
+            <h4 style="margin-bottom:10px;">👤 بيانات المتقدم</h4>
+            <p><strong>الاسم:</strong> ${app.userName || 'غير محدد'}</p>
+            <p><strong>البريد الإلكتروني:</strong> ${app.userEmail || 'غير محدد'}</p>
+            
+            <hr style="margin:15px 0;">
+            <h4 style="margin-bottom:10px;">💼 بيانات الوظيفة</h4>
+            <p><strong>الوظيفة:</strong> ${app.jobTitle || 'غير محدد'}</p>
             <p><strong>الشركة:</strong> ${app.jobCompany || 'غير محدد'}</p>
             <p><strong>المدينة:</strong> ${app.jobCity || 'غير محدد'}</p>
+            
+            <hr style="margin:15px 0;">
+            <h4 style="margin-bottom:10px;">💰 بيانات الدفع</h4>
+            <p><strong>المبلغ المدفوع:</strong> ${(app.amount || 1000).toLocaleString()} ريال يمني</p>
+            <p><strong>رقم العملية:</strong> ${app.transactionRef || 'غير مدخل'}</p>
+            <p><strong>طريقة الدفع:</strong> ${app.walletUsed || 'غير محددة'}</p>
+            
+            <hr style="margin:15px 0;">
+            <h4 style="margin-bottom:10px;">📎 إثبات الدفع</h4>
+            ${proofImageHtml}
+            
+            <hr style="margin:15px 0;">
+            <h4 style="margin-bottom:10px;">📊 حالة الطلب</h4>
+            <p><strong>الحالة الحالية:</strong> ${app.status || 'جديد'}</p>
             <p><strong>تاريخ التقديم:</strong> ${appliedDate}</p>
-            <p><strong>الحالة:</strong> ${app.status || 'جديد'}</p>
-            <p><strong>اسم الملف:</strong> ${app.cvFileName || 'غير متوفر'}</p>
-            ${cvDownloadButton}
+            ${app.reviewedAt ? `<p><strong>تاريخ المراجعة:</strong> ${new Date(app.reviewedAt.seconds ? app.reviewedAt.seconds * 1000 : app.reviewedAt).toLocaleDateString('ar')}</p>` : ''}
+            ${app.adminNotes ? `<p><strong>ملاحظات الإدارة:</strong> ${app.adminNotes}</p>` : ''}
         </div>
         <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="changeApplicantStatus('${app.id}', 'مقبول')">
+            <button class="btn btn-primary" onclick="changeApplicationStatus('${app.id}', 'مقبول')">
                 <i class="fas fa-check"></i> قبول
             </button>
-            <button class="btn" style="background:#f59e0b;color:#fff;" onclick="changeApplicantStatus('${app.id}', 'قيد المراجعة')">
+            <button class="btn" style="background:#f59e0b;color:#fff;" onclick="changeApplicationStatus('${app.id}', 'قيد المراجعة')">
                 <i class="fas fa-clock"></i> قيد المراجعة
             </button>
-            <button class="btn" style="background:#dc2626;color:#fff;" onclick="changeApplicantStatus('${app.id}', 'مرفوض')">
+            <button class="btn" style="background:#dc2626;color:#fff;" onclick="changeApplicationStatus('${app.id}', 'مرفوض')">
                 <i class="fas fa-times"></i> رفض
             </button>
         </div>
@@ -661,47 +729,81 @@ function viewApplicant(appId) {
     
     openModal('applicantDetailModal');
 }
-async function changeApplicantStatus(appId, newStatus) {
-    const success = await updateApplicantInFirestore(appId, { status: newStatus });
+
+// فتح نافذة تغيير الحالة
+function updateApplicationStatusModal(appId) {
+    const app = adminApplications.find(a => a.id === appId);
+    if (!app) return;
+    
+    const content = document.getElementById('applicantDetailContent');
+    if (!content) return;
+    
+    content.innerHTML = `
+        <h3 style="margin-bottom:15px;">تغيير حالة الطلب</h3>
+        <div style="background:var(--bg-gray);padding:20px;border-radius:var(--radius);">
+            <p><strong>المتقدم:</strong> ${app.userName}</p>
+            <p><strong>الوظيفة:</strong> ${app.jobTitle}</p>
+            <div class="form-group" style="margin-top:15px;">
+                <label>اختر الحالة الجديدة</label>
+                <select id="newStatusSelect" class="form-input">
+                    <option value="جديد" ${app.status === 'جديد' ? 'selected' : ''}>جديد</option>
+                    <option value="قيد المراجعة" ${app.status === 'قيد المراجعة' ? 'selected' : ''}>قيد المراجعة</option>
+                    <option value="مقبول" ${app.status === 'مقبول' ? 'selected' : ''}>مقبول</option>
+                    <option value="مرفوض" ${app.status === 'مرفوض' ? 'selected' : ''}>مرفوض</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ملاحظات (اختياري)</label>
+                <textarea id="adminNotes" class="form-input" rows="3" placeholder="أضف ملاحظات..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="saveApplicationStatus('${app.id}')">
+                <i class="fas fa-save"></i> حفظ التغييرات
+            </button>
+        </div>
+    `;
+    
+    openModal('applicantDetailModal');
+}
+
+async function saveApplicationStatus(appId) {
+    const newStatus = document.getElementById('newStatusSelect')?.value;
+    const notes = document.getElementById('adminNotes')?.value || '';
+    
+    if (!newStatus) return;
+    
+    const success = await updateApplicationStatus(appId, newStatus, notes);
     if (success) {
         showToast(`تم تحديث الحالة إلى "${newStatus}"`, 'success');
         closeModal('applicantDetailModal');
-        await loadApplicantsTable();
+        await loadApplicationsTable();
         await loadDashboard();
     } else {
         showToast('فشل تحديث الحالة', 'error');
     }
 }
 
-async function updateApplicantStatus(appId) {
-    const app = adminApplicants.find(a => a.id === appId);
-    if (!app) return;
-    
-    const statuses = ['جديد', 'قيد المراجعة', 'مقبول', 'مرفوض'];
-    const currentStatus = app.status || 'جديد';
-    const currentIndex = statuses.indexOf(currentStatus);
-    const newStatus = statuses[(currentIndex + 1) % statuses.length];
-    
-    const success = await updateApplicantInFirestore(appId, { status: newStatus });
+async function changeApplicationStatus(appId, newStatus) {
+    const success = await updateApplicationStatus(appId, newStatus);
     if (success) {
-        await loadApplicantsTable();
+        showToast(`تم تحديث الحالة إلى "${newStatus}"`, 'success');
+        closeModal('applicantDetailModal');
+        await loadApplicationsTable();
         await loadDashboard();
-        showToast(`تم تغيير الحالة إلى "${newStatus}"`, 'success');
     } else {
-        showToast('فشل تغيير الحالة', 'error');
+        showToast('فشل تحديث الحالة', 'error');
     }
 }
 
-async function deleteApplicant(appId) {
-    if (!confirm('هل أنت متأكد من حذف هذا المتقدم؟')) return;
+async function deleteApplicationHandler(appId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
     
-    const success = await deleteApplicantFromFirestore(appId);
+    const success = await deleteApplication(appId);
     if (success) {
-        showToast('تم حذف المتقدم بنجاح', 'success');
-        await loadApplicantsTable();
+        showToast('تم حذف الطلب بنجاح', 'success');
+        await loadApplicationsTable();
         await loadDashboard();
     } else {
-        showToast('فشل حذف المتقدم', 'error');
+        showToast('فشل حذف الطلب', 'error');
     }
 }
 
@@ -709,13 +811,13 @@ async function deleteApplicant(appId) {
 // COMPANIES MANAGEMENT
 // ============================================
 async function loadCompaniesTable() {
-    adminCompanies = await fetchCompaniesFromFirestore();
+    adminCompanies = await fetchCompanies();
     
     const tbody = document.getElementById('companiesTableBody');
     if (!tbody) return;
     
     if (adminCompanies.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">لا توجد شركات بعد - اضغط "إضافة شركة" لإضافة أول شركة</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">لا توجد شركات بعد - اضغط "إضافة شركة" لإضافة أول شركة</td></tr>`;
         return;
     }
     
@@ -727,13 +829,12 @@ async function loadCompaniesTable() {
                     ${company.logo || company.name?.charAt(0) || 'ش'}
                 </div>
             </td>
-            <td><strong>${company.name}</strong></td>
+            <td><strong>${company.name || '-'}</strong></td>
             <td>${company.industry || '-'}</td>
             <td>${company.city || '-'}</td>
-            <td>${company.jobs || 0}</td>
             <td>
                 <div class="table-actions">
-                    <button class="btn-icon btn-delete" onclick="deleteCompany('${company.id}')" title="حذف">
+                    <button class="btn-icon btn-delete" onclick="deleteCompanyHandler('${company.id}')" title="حذف">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -751,14 +852,14 @@ async function saveCompany(event) {
     event.preventDefault();
     
     const companyData = {
-        name: document.getElementById('companyName').value,
-        industry: document.getElementById('companyIndustry').value,
-        city: document.getElementById('companyCity').value,
-        logo: document.getElementById('companyLogo').value,
+        name: document.getElementById('companyName')?.value,
+        industry: document.getElementById('companyIndustry')?.value,
+        city: document.getElementById('companyCity')?.value,
+        logo: document.getElementById('companyLogo')?.value,
         jobs: 0
     };
     
-    const newCompany = await addCompanyToFirestore(companyData);
+    const newCompany = await addCompany(companyData);
     if (newCompany) {
         closeModal('companyModal');
         await loadCompaniesTable();
@@ -769,10 +870,10 @@ async function saveCompany(event) {
     }
 }
 
-async function deleteCompany(companyId) {
+async function deleteCompanyHandler(companyId) {
     if (!confirm('هل أنت متأكد من حذف هذه الشركة؟')) return;
     
-    const success = await deleteCompanyFromFirestore(companyId);
+    const success = await deleteCompany(companyId);
     if (success) {
         showToast('تم حذف الشركة بنجاح', 'success');
         await loadCompaniesTable();
@@ -789,10 +890,10 @@ function saveSettings(event) {
     event.preventDefault();
     
     const settings = {
-        siteName: document.getElementById('siteName').value,
-        siteEmail: document.getElementById('siteEmail').value,
-        sitePhone: document.getElementById('sitePhone').value,
-        siteAddress: document.getElementById('siteAddress').value
+        siteName: document.getElementById('siteName')?.value,
+        siteEmail: document.getElementById('siteEmail')?.value,
+        sitePhone: document.getElementById('sitePhone')?.value,
+        siteAddress: document.getElementById('siteAddress')?.value
     };
     
     localStorage.setItem('adminSettings', JSON.stringify(settings));
@@ -802,12 +903,12 @@ function saveSettings(event) {
 function changePassword(event) {
     event.preventDefault();
     
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    const currentPassword = document.getElementById('currentPassword')?.value;
+    const newPassword = document.getElementById('newPassword')?.value;
+    const confirmPassword = document.getElementById('confirmPassword')?.value;
     
-    if (currentPassword !== ADMIN_CREDENTIALS.password) {
-        showToast('كلمة المرور الحالية غير صحيحة', 'error');
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast('يرجى ملء جميع الحقول', 'error');
         return;
     }
     
@@ -821,8 +922,8 @@ function changePassword(event) {
         return;
     }
     
-    showToast('تم تغيير كلمة المرور بنجاح 🔒', 'success');
-    document.getElementById('passwordForm').reset();
+    showToast('تم تغيير كلمة المرور بنجاح 🔒 (للمستخدم المحلي فقط)', 'success');
+    document.getElementById('passwordForm')?.reset();
 }
 
 // ============================================
@@ -863,8 +964,6 @@ function showToast(message, type = '') {
 // NOTIFICATIONS
 // ============================================
 function showNotifications() {
-    const dot = document.getElementById('notificationDot');
-    if (dot) dot.classList.toggle('active');
     showToast('لا توجد إشعارات جديدة', '');
 }
 
@@ -885,19 +984,13 @@ async function initAdminDashboard() {
     if (savedSettings.siteAddress && document.getElementById('siteAddress')) 
         document.getElementById('siteAddress').value = savedSettings.siteAddress;
     
-    // تحميل البيانات من Firestore
+    // تحميل البيانات
     await loadDashboard();
-    
-    // محاكاة إشعارات
-    if (Math.random() > 0.5) {
-        const dot = document.getElementById('notificationDot');
-        if (dot) dot.classList.add('active');
-    }
     
     console.log('🚀 لوحة تحكم شغلي جاهزة');
     console.log('🔥 Firebase:', firebaseReady ? 'متصل' : 'وضع محلي');
     console.log('📊 الوظائف:', adminJobs.length);
-    console.log('👥 المتقدمين:', adminApplicants.length);
+    console.log('📋 الطلبات:', adminApplications.length);
     console.log('🏢 الشركات:', adminCompanies.length);
 }
 
@@ -917,15 +1010,16 @@ window.switchPage = switchPage;
 window.openAddJobModal = openAddJobModal;
 window.editJob = editJob;
 window.saveJob = saveJob;
-window.deleteJob = deleteJob;
-window.filterApplicants = filterApplicants;
-window.viewApplicant = viewApplicant;
-window.updateApplicantStatus = updateApplicantStatus;
-window.deleteApplicant = deleteApplicant;
-window.changeApplicantStatus = changeApplicantStatus;
+window.deleteJobHandler = deleteJobHandler;
+window.filterApplications = filterApplications;
+window.viewApplication = viewApplication;
+window.updateApplicationStatusModal = updateApplicationStatusModal;
+window.saveApplicationStatus = saveApplicationStatus;
+window.changeApplicationStatus = changeApplicationStatus;
+window.deleteApplicationHandler = deleteApplicationHandler;
 window.openAddCompanyModal = openAddCompanyModal;
 window.saveCompany = saveCompany;
-window.deleteCompany = deleteCompany;
+window.deleteCompanyHandler = deleteCompanyHandler;
 window.saveSettings = saveSettings;
 window.changePassword = changePassword;
 window.openModal = openModal;
