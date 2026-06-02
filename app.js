@@ -477,6 +477,9 @@ function downloadQRCode(qrUrl, walletName) {
 // ============================================
 // تأكيد الدفع وإرسال الطلب
 // ============================================
+// ============================================
+// تأكيد الدفع وإرسال الطلب (بدون Firebase Storage)
+// ============================================
 async function confirmPayment() {
     const transactionRef = document.getElementById('transactionRef')?.value.trim();
     const paymentProof = document.getElementById('paymentProof')?.files[0];
@@ -496,6 +499,14 @@ async function confirmPayment() {
         return;
     }
     
+    // الحد الأقصى للحجم 2 ميجابايت (لأن Base64 يزيد الحجم)
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    
+    if (paymentProof.size > MAX_SIZE) {
+        showToast('⚠️ حجم الصورة كبير جداً. الحد الأقصى 2 ميجابايت', 'error');
+        return;
+    }
+    
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     if (confirmBtn) {
         confirmBtn.disabled = true;
@@ -503,29 +514,19 @@ async function confirmPayment() {
     }
     
     try {
-        showToast('📤 جاري رفع صورة التحويل...', '');
+        showToast('📄 جاري تحميل الصورة...', '');
         
-        // رفع صورة الإشعار
-        let proofUrl = '';
-        if (window.storage && firebaseReady) {
-            const fileName = `payment_proofs/${pendingApplication.userId}_${Date.now()}_${paymentProof.name}`;
-            const storageRef = ref(window.storage, fileName);
-            const uploadTask = uploadBytesResumable(storageRef, paymentProof);
-            
-            proofUrl = await new Promise((resolve, reject) => {
-                uploadTask.on('state_changed', null,
-                    (error) => reject(error),
-                    async () => {
-                        const url = await getDownloadURL(uploadTask.snapshot.ref);
-                        resolve(url);
-                    }
-                );
-            });
-        }
+        // تحويل الصورة إلى Base64 (بدون رفع إلى Storage)
+        const proofBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+            reader.readAsDataURL(paymentProof);
+        });
         
         showToast('💾 جاري حفظ الطلب...', '');
         
-        // حفظ الطلب في قاعدة البيانات
+        // حفظ الطلب في Firestore فقط (بدون Storage)
         const applicationData = {
             userId: pendingApplication.userId,
             userEmail: pendingApplication.userEmail,
@@ -535,7 +536,10 @@ async function confirmPayment() {
             jobCompany: pendingApplication.jobCompany,
             jobCity: pendingApplication.jobCity,
             transactionRef: transactionRef,
-            paymentProof: proofUrl,
+            paymentProofBase64: proofBase64,  // تخزين الصورة كـ Base64
+            paymentProofName: paymentProof.name,
+            paymentProofSize: paymentProof.size,
+            paymentProofType: paymentProof.type,
             walletUsed: window.selectedWallet || 'غير محدد',
             amount: APPLICATION_FEE,
             status: 'قيد المراجعة',
