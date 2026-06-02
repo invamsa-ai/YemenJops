@@ -898,19 +898,71 @@ async function handleRegister(event) {
 
 function updateNavForLoggedInUser() {
     const navActions = document.querySelector('.nav-actions');
-    if (currentUser && navActions) {
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (currentUser) {
         const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم';
-        navActions.innerHTML = `
-            <span style="font-weight:600;color:var(--primary);font-size:0.9rem;">
-                <i class="fas fa-user-circle"></i> ${displayName}
-            </span>
-            <button class="btn btn-outline btn-sm" onclick="handleLogout()">
-                <i class="fas fa-sign-out-alt"></i> خروج
-            </button>
-        `;
+        
+        // تحديث أزرار تسجيل الدخول/التسجيل لتظهر أيقونة المستخدم والقائمة المنسدلة
+        if (navActions) {
+            navActions.innerHTML = `
+                <div class="user-menu">
+                    <button class="user-menu-btn" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>${displayName}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="#" onclick="viewMyApplications(); return false;">
+                            <i class="fas fa-file-alt"></i> تقديماتي
+                        </a>
+                        <a href="#" onclick="viewMyProfile(); return false;">
+                            <i class="fas fa-user"></i> ملفي الشخصي
+                        </a>
+                        <a href="#" onclick="viewSavedJobs(); return false;">
+                            <i class="fas fa-bookmark"></i> الوظائف المحفوظة
+                        </a>
+                        <hr>
+                        <a href="#" onclick="handleLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // إضافة روابط إضافية في القائمة الجانبية للجوال
+        if (navLinks) {
+            const existingUserLinks = navLinks.querySelectorAll('.user-nav-link');
+            if (existingUserLinks.length === 0) {
+                const userLinksHTML = `
+                    <li class="user-nav-link mobile-only"><a href="#" onclick="viewMyApplications(); return false;"><i class="fas fa-file-alt"></i> تقديماتي</a></li>
+                    <li class="user-nav-link mobile-only"><a href="#" onclick="viewMyProfile(); return false;"><i class="fas fa-user"></i> ملفي الشخصي</a></li>
+                    <li class="user-nav-link mobile-only"><a href="#" onclick="viewSavedJobs(); return false;"><i class="fas fa-bookmark"></i> الوظائف المحفوظة</a></li>
+                `;
+                navLinks.insertAdjacentHTML('beforeend', userLinksHTML);
+            }
+        }
+    } else {
+        // المستخدم غير مسجل الدخول - عرض أزرار الدخول والتسجيل
+        if (navActions) {
+            navActions.innerHTML = `
+                <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">
+                    <i class="fas fa-sign-in-alt"></i> دخول
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">
+                    <i class="fas fa-user-plus"></i> تسجيل
+                </button>
+            `;
+        }
+        
+        // إزالة روابط المستخدم من القائمة الجانبية
+        if (navLinks) {
+            const userLinks = navLinks.querySelectorAll('.user-nav-link');
+            userLinks.forEach(link => link.remove());
+        }
     }
 }
-
 async function handleLogout() {
     if (window.firebaseReady && window.auth) {
         try {
@@ -924,6 +976,362 @@ async function handleLogout() {
     location.reload();
 }
 
+// دالة لفتح/إغلاق قائمة المستخدم المنسدلة
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// إغلاق القائمة عند النقر خارجها
+document.addEventListener('click', function(event) {
+    const userMenu = document.querySelector('.user-menu');
+    const dropdown = document.getElementById('userDropdown');
+    if (userMenu && dropdown && !userMenu.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// عرض تقديمات المستخدم
+async function viewMyApplications() {
+    if (!currentUser) {
+        showToast('يرجى تسجيل الدخول أولاً', 'error');
+        openModal('loginModal');
+        return;
+    }
+    
+    showToast('جاري تحميل تقديماتك...', '');
+    
+    try {
+        const applicationsRef = collection(window.db, 'applications');
+        const q = query(applicationsRef, where('userId', '==', currentUser.uid), orderBy('appliedAt', 'desc'));
+        const snapshot = await getDocs(q);
+        
+        const applications = [];
+        snapshot.forEach(doc => {
+            applications.push({ id: doc.id, ...doc.data() });
+        });
+        
+        if (applications.length === 0) {
+            showApplicationsModal([], 'لا توجد تقديمات سابقة');
+        } else {
+            showApplicationsModal(applications);
+        }
+    } catch (error) {
+        console.error('خطأ في جلب التقديمات:', error);
+        showToast('حدث خطأ في تحميل التقديمات', 'error');
+    }
+}
+
+// عرض نافذة التقديمات
+function showApplicationsModal(applications, emptyMessage = null) {
+    let contentHTML = '';
+    
+    if (applications.length === 0) {
+        contentHTML = `
+            <div style="text-align:center; padding:40px;">
+                <i class="fas fa-folder-open" style="font-size:48px; color:var(--text-muted); margin-bottom:15px;"></i>
+                <p>${emptyMessage || 'لا توجد تقديمات سابقة'}</p>
+                <button class="btn btn-primary btn-sm" onclick="closeModal('applicationsModal'); document.getElementById('jobs-section').scrollIntoView({behavior:'smooth'});">
+                    <i class="fas fa-search"></i> تصفح الوظائف
+                </button>
+            </div>
+        `;
+    } else {
+        contentHTML = `
+            <div style="max-height:500px; overflow-y:auto;">
+                ${applications.map(app => `
+                    <div style="border:1px solid var(--border); border-radius:var(--radius-sm); padding:15px; margin-bottom:12px; background:white;">
+                        <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <h4 style="margin:0 0 5px 0; color:var(--primary);">${app.jobTitle || 'وظيفة'}</h4>
+                                <p style="margin:0; font-size:0.85rem;"><i class="fas fa-building"></i> ${app.jobCompany || 'شركة'}</p>
+                                <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--text-muted);"><i class="fas fa-map-marker-alt"></i> ${app.jobCity || 'غير محدد'}</p>
+                            </div>
+                            <div style="text-align:left;">
+                                <span class="application-status status-${getStatusClass(app.status)}">
+                                    ${getStatusText(app.status)}
+                                </span>
+                                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:5px;">
+                                    <i class="fas fa-calendar"></i> ${formatDate(app.appliedAt)}
+                                </p>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-light); font-size:0.8rem;">
+                            <strong>رقم العملية:</strong> ${app.transactionRef || 'غير متوفر'}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    const modalHTML = `
+        <div class="modal-overlay active" id="applicationsModal" onclick="if(event.target===this)closeModal('applicationsModal')">
+            <div class="modal" style="max-width:600px; text-align:right;">
+                <button class="modal-close" onclick="closeModal('applicationsModal')">&times;</button>
+                <h2 style="text-align:center;"><i class="fas fa-file-alt"></i> تقديماتي</h2>
+                ${contentHTML}
+            </div>
+        </div>
+    `;
+    
+    const existing = document.getElementById('applicationsModal');
+    if (existing) existing.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('applicationsModal').classList.add('active');
+}
+
+// عرض الملف الشخصي
+async function viewMyProfile() {
+    if (!currentUser) {
+        showToast('يرجى تسجيل الدخول أولاً', 'error');
+        openModal('loginModal');
+        return;
+    }
+    
+    showToast('جاري تحميل الملف الشخصي...', '');
+    
+    try {
+        const usersRef = collection(window.db, 'users');
+        const q = query(usersRef, where('uid', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        
+        let userData = {
+            name: currentUser.displayName || currentUser.email?.split('@')[0] || 'مستخدم',
+            email: currentUser.email,
+            phone: '',
+            city: '',
+            role: 'باحث عن عمل'
+        };
+        
+        snapshot.forEach(doc => {
+            userData = { ...userData, ...doc.data() };
+        });
+        
+        const profileHTML = `
+            <div class="modal-overlay active" id="profileModal" onclick="if(event.target===this)closeModal('profileModal')">
+                <div class="modal" style="max-width:500px; text-align:right;">
+                    <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+                    <h2 style="text-align:center;"><i class="fas fa-user-circle"></i> ملفي الشخصي</h2>
+                    
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <div style="width:80px; height:80px; background:var(--primary-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
+                            <i class="fas fa-user" style="font-size:40px; color:var(--primary);"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label><i class="fas fa-user"></i> الاسم الكامل</label>
+                        <p>${userData.name || 'غير محدد'}</p>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                        <p>${userData.email}</p>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label><i class="fas fa-phone"></i> رقم الجوال</label>
+                        <p>${userData.phone || 'غير مضاف'}</p>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label><i class="fas fa-map-marker-alt"></i> المدينة</label>
+                        <p>${userData.city || 'غير محدد'}</p>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label><i class="fas fa-briefcase"></i> الدور</label>
+                        <p>${userData.role || 'باحث عن عمل'}</p>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-block" onclick="closeModal('profileModal'); openEditProfileModal('${userData.name}', '${userData.phone}', '${userData.city}')">
+                        <i class="fas fa-edit"></i> تعديل الملف الشخصي
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        const existing = document.getElementById('profileModal');
+        if (existing) existing.remove();
+        document.body.insertAdjacentHTML('beforeend', profileHTML);
+        document.getElementById('profileModal').classList.add('active');
+        
+    } catch (error) {
+        console.error('خطأ:', error);
+        showToast('حدث خطأ في تحميل الملف الشخصي', 'error');
+    }
+}
+
+// عرض الوظائف المحفوظة
+function viewSavedJobs() {
+    if (!currentUser) {
+        showToast('يرجى تسجيل الدخول أولاً', 'error');
+        openModal('loginModal');
+        return;
+    }
+    
+    if (savedJobs.length === 0) {
+        showToast('لا توجد وظائف محفوظة', 'info');
+        return;
+    }
+    
+    const savedJobsList = allJobs.filter(job => savedJobs.includes(String(job.id)));
+    
+    if (savedJobsList.length === 0) {
+        showToast('الوظائف المحفوظة غير متوفرة حالياً', 'info');
+        return;
+    }
+    
+    const savedJobsHTML = `
+        <div class="modal-overlay active" id="savedJobsModal" onclick="if(event.target===this)closeModal('savedJobsModal')">
+            <div class="modal" style="max-width:650px; text-align:right;">
+                <button class="modal-close" onclick="closeModal('savedJobsModal')">&times;</button>
+                <h2 style="text-align:center;"><i class="fas fa-bookmark"></i> الوظائف المحفوظة (${savedJobsList.length})</h2>
+                <div style="max-height:500px; overflow-y:auto;">
+                    ${savedJobsList.map(job => `
+                        <div style="border:1px solid var(--border); border-radius:var(--radius-sm); padding:15px; margin-bottom:12px; cursor:pointer;" onclick="closeModal('savedJobsModal'); viewJobDetail('${job.id}')">
+                            <h4 style="margin:0 0 5px 0; color:var(--primary);">${job.title}</h4>
+                            <p style="margin:0; font-size:0.85rem;"><i class="fas fa-building"></i> ${job.company}</p>
+                            <p style="margin:5px 0 0 0; font-size:0.8rem;"><i class="fas fa-map-marker-alt"></i> ${job.city}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existing = document.getElementById('savedJobsModal');
+    if (existing) existing.remove();
+    document.body.insertAdjacentHTML('beforeend', savedJobsHTML);
+    document.getElementById('savedJobsModal').classList.add('active');
+}
+
+// فتح نافذة تعديل الملف الشخصي
+function openEditProfileModal(name, phone, city) {
+    const editHTML = `
+        <div class="modal-overlay active" id="editProfileModal" onclick="if(event.target===this)closeModal('editProfileModal')">
+            <div class="modal" style="max-width:500px; text-align:right;">
+                <button class="modal-close" onclick="closeModal('editProfileModal')">&times;</button>
+                <h2 style="text-align:center;"><i class="fas fa-edit"></i> تعديل الملف الشخصي</h2>
+                <form id="editProfileForm" onsubmit="updateUserProfile(event)">
+                    <div class="form-group">
+                        <label>الاسم الكامل</label>
+                        <input type="text" id="editName" value="${name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الجوال</label>
+                        <input type="tel" id="editPhone" value="${phone || ''}" placeholder="أدخل رقم جوالك">
+                    </div>
+                    <div class="form-group">
+                        <label>المدينة</label>
+                        <select id="editCity">
+                            <option value="">اختر مدينتك</option>
+                            ${yemeniCities.map(c => `<option value="${c}" ${city === c ? 'selected' : ''}>${c}</option>`).join('')}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-save"></i> حفظ التغييرات
+                    </button>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    const existing = document.getElementById('editProfileModal');
+    if (existing) existing.remove();
+    document.body.insertAdjacentHTML('beforeend', editHTML);
+    document.getElementById('editProfileModal').classList.add('active');
+}
+
+// تحديث بيانات المستخدم
+async function updateUserProfile(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('editName')?.value.trim();
+    const phone = document.getElementById('editPhone')?.value.trim();
+    const city = document.getElementById('editCity')?.value;
+    
+    if (!name) {
+        showToast('الاسم مطلوب', 'error');
+        return;
+    }
+    
+    showToast('جاري حفظ التغييرات...', '');
+    
+    try {
+        const usersRef = collection(window.db, 'users');
+        const q = query(usersRef, where('uid', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        
+        let userDocId = null;
+        snapshot.forEach(doc => {
+            userDocId = doc.id;
+        });
+        
+        if (userDocId) {
+            await updateDoc(doc(window.db, 'users', userDocId), {
+                name: name,
+                phone: phone,
+                city: city,
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            await addDoc(collection(window.db, 'users'), {
+                uid: currentUser.uid,
+                name: name,
+                email: currentUser.email,
+                phone: phone,
+                city: city,
+                role: 'باحث عن عمل',
+                createdAt: serverTimestamp()
+            });
+        }
+        
+        showToast('تم تحديث الملف الشخصي بنجاح ✅', 'success');
+        closeModal('editProfileModal');
+        setTimeout(() => viewMyProfile(), 500);
+        
+    } catch (error) {
+        console.error('خطأ في تحديث الملف:', error);
+        showToast('حدث خطأ في حفظ التغييرات', 'error');
+    }
+}
+
+// دوال مساعدة
+function getStatusClass(status) {
+    const statusMap = {
+        'قيد المراجعة': 'pending',
+        'تم القبول': 'accepted',
+        'مرفوض': 'rejected',
+        'pending': 'pending',
+        'accepted': 'accepted',
+        'rejected': 'rejected'
+    };
+    return statusMap[status] || 'pending';
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'pending': '⏳ قيد المراجعة',
+        'accepted': '✅ تم القبول',
+        'rejected': '❌ مرفوض',
+        'قيد المراجعة': '⏳ قيد المراجعة',
+        'تم القبول': '✅ تم القبول',
+        'مرفوض': '❌ مرفوض'
+    };
+    return statusMap[status] || '⏳ قيد المراجعة';
+}
+
+function formatDate(timestamp) {
+    if (!timestamp) return 'غير محدد';
+    if (timestamp.seconds) {
+        return new Date(timestamp.seconds * 1000).toLocaleDateString('ar');
+    }
+    return String(timestamp);
+}
 // ============================================
 // MODAL HELPERS
 // ============================================
@@ -1069,3 +1477,9 @@ window.confirmPayment = confirmPayment;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
 window.handleLogout = handleLogout;
+window.toggleUserMenu = toggleUserMenu;
+window.viewMyApplications = viewMyApplications;
+window.viewMyProfile = viewMyProfile;
+window.viewSavedJobs = viewSavedJobs;
+window.openEditProfileModal = openEditProfileModal;
+window.updateUserProfile = updateUserProfile;
