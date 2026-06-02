@@ -188,8 +188,11 @@ body {
 
 /* ============ HERO SECTION ============ */
 .hero {
-    background: linear-gradient(160deg, #e8f5f0 0%, #d4ede3 30%, #f0f7f4 60%, #eaf6f1 100%);
-    padding: 50px 24px 60px;
+    background: linear-gradient(rgba(13, 107, 79, 0.85), rgba(13, 107, 79, 0.9)), url('../images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;    padding: 50px 24px 60px;
     text-align: center;
     position: relative;
     overflow: hidden;
