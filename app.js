@@ -1301,9 +1301,11 @@ async function updateUserProfile(event) {
 }
 
 // دوال مساعدة
+// دوال مساعدة - النسخة المعدلة للغة العربية
 function getStatusClass(status) {
     const statusMap = {
         'قيد المراجعة': 'pending',
+        'مقبول': 'accepted',      // أضف هذا
         'تم القبول': 'accepted',
         'مرفوض': 'rejected',
         'pending': 'pending',
@@ -1316,10 +1318,11 @@ function getStatusClass(status) {
 function getStatusText(status) {
     const statusMap = {
         'pending': '⏳ قيد المراجعة',
-        'accepted': '✅ تم القبول',
+        'accepted': '✅ مقبول',           // غير هذا
         'rejected': '❌ مرفوض',
         'قيد المراجعة': '⏳ قيد المراجعة',
-        'تم القبول': '✅ تم القبول',
+        'مقبول': '✅ مقبول',              // أضف هذا
+        'تم القبول': '✅ مقبول',
         'مرفوض': '❌ مرفوض'
     };
     return statusMap[status] || '⏳ قيد المراجعة';
