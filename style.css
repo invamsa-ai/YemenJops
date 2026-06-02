@@ -1,13 +1,13 @@
 :root {
-    --primary: #0d6b4f;
-    --primary-dark: #084d38;
+--primary: #afd6ca;
+    --primary-dark: #000000;
     --primary-light: #e8f5f0;
     --secondary: #f4a024;
     --secondary-dark: #d4891a;
     --accent: #1a8a6a;
     --text-dark: #1a1a2e;
-    --text-medium: #444;
-    --text-light: #6b7280;
+    --text-medium: #000000;
+    --text-light: #000000;
     --text-muted: #9ca3af;
     --bg-light: #f8fafb;
     --bg-white: #ffffff;
@@ -237,6 +237,7 @@ body {
     color: var(--primary);
     position: relative;
 }
+
 .hero h1 .highlight::after {
     content: '';
     position: absolute;
