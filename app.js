@@ -275,8 +275,8 @@ function viewJobDetail(jobId) {
                 <div id="applicationForm" style="display:${currentUser ? 'block' : 'none'};">
                     <div class="form-group">
                         <label><i class="fas fa-file-pdf"></i> رفع السيرة الذاتية (PDF, DOC, DOCX)</label>
-                        <input type="file" id="cvFile" accept=".pdf,.doc,.docx" class="form-input" style="padding:8px;">
-                        <small style="color:var(--text-muted);">الحد الأقصى: 5 ميجابايت</small>
+                     <input type="file" id="cvFile" accept=".pdf,.doc,.docx" class="form-input" style="padding:8px;">
+<small style="color:var(--text-muted);">الحد الأقصى: 100 ميجابايت (PDF, DOC, DOCX)</small>
                     </div>
                     <button class="btn btn-primary btn-block btn-lg" onclick="applyForJob('${jobIdStr}')" id="applyBtn">
                         <i class="fas fa-paper-plane"></i> تقديم طلب التوظيف
@@ -334,9 +334,8 @@ async function applyForJob(jobId) {
         applyBtn.style.cursor = 'not-allowed';
     }
     
-    showToast('⏳ جاري تجهيز طلبك...', '');
-    
     try {
+        // جلب بيانات المستخدم
         let userName = 'مستخدم';
         let userEmail = currentUser.email || '';
         let userPhone = '';
@@ -354,61 +353,76 @@ async function applyForJob(jobId) {
             }
         }
         
-        // رفع السيرة الذاتية (حتى 100 ميجابايت)
+        // رفع السيرة الذاتية - دعم حتى 100 ميجابايت
         let cvUrl = '';
         let cvFileName = '';
         const cvFileInput = document.getElementById('cvFile');
         
         if (cvFileInput && cvFileInput.files.length > 0) {
             const file = cvFileInput.files[0];
-            const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+            const MAX_SIZE = 100 * 1024 * 1024; // 100 ميجابايت
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
             
+            // التحقق من الحجم
             if (file.size > MAX_SIZE) {
-                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                throw new Error(`حجم الملف كبير جداً (${sizeMB} ميجابايت). الحد الأقصى 100 ميجابايت`);
+                throw new Error(`⚠️ حجم الملف كبير جداً (${fileSizeMB} MB). الحد الأقصى 100 MB`);
             }
             
-            showToast('⏳ جاري رفع السيرة الذاتية...', '');
+            // التحقق من نوع الملف
+            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!allowedTypes.includes(file.type)) {
+                throw new Error('❌ يرجى رفع ملف PDF أو DOC أو DOCX فقط');
+            }
+            
+            showToast(`📄 جاري رفع السيرة الذاتية (${fileSizeMB} MB)...`, '');
             
             if (window.storage && firebaseReady) {
-                const storageRef = ref(window.storage, `cvs/${currentUser.uid}_${Date.now()}_${file.name}`);
+                // رفع إلى Firebase Storage
+                const fileName = `${currentUser.uid}_${Date.now()}_${file.name}`;
+                const storageRef = ref(window.storage, `cvs/${fileName}`);
                 const uploadTask = uploadBytesResumable(storageRef, file);
                 
-                await new Promise((resolve, reject) => {
+                cvUrl = await new Promise((resolve, reject) => {
                     uploadTask.on('state_changed',
                         (snapshot) => {
                             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            const sizeDone = (snapshot.bytesTransferred / (1024 * 1024)).toFixed(1);
-                            const sizeTotal = (snapshot.totalBytes / (1024 * 1024)).toFixed(1);
-                            showToast(`⏳ جاري رفع السيرة الذاتية... ${Math.round(progress)}% (${sizeDone}/${sizeTotal} MB)`, '');
+                            showToast(`⏳ جاري الرفع... ${Math.round(progress)}%`, '');
                         },
-                        (error) => {
-                            reject(error);
-                        },
+                        (error) => reject(error),
                         async () => {
-                            cvUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                            resolve();
+                            const url = await getDownloadURL(uploadTask.snapshot.ref);
+                            resolve(url);
                         }
                     );
                 });
+                
+                cvFileName = file.name;
+                showToast(`✅ تم رفع السيرة الذاتية بنجاح`, 'success');
             } else {
-                // إذا Storage غير متاح، نخزن Base64 للملفات الصغيرة فقط
-                if (file.size > 1 * 1024 * 1024) {
-                    throw new Error('خدمة التخزين غير متاحة للملفات الكبيرة. يرجى ترقية الخطة أو تصغير الملف');
+                // استخدام Base64 كحل بديل (للملفات الصغيرة فقط)
+                if (file.size > 5 * 1024 * 1024) {
+                    throw new Error('خدمة التخزين غير متاحة للملفات الكبيرة. يرجى المحاولة لاحقاً.');
                 }
+                
                 cvUrl = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
                     reader.onerror = reject;
                     reader.readAsDataURL(file);
                 });
+                cvFileName = file.name;
             }
-            
-            cvFileName = file.name;
+        } else {
+            showToast('⚠️ يرجى اختيار السيرة الذاتية قبل التقديم', 'error');
+            if (applyBtn) {
+                applyBtn.disabled = false;
+                applyBtn.innerHTML = originalBtnText;
+                applyBtn.style.opacity = '1';
+            }
+            return;
         }
         
-        showToast('⏳ جاري حفظ طلبك...', '');
-        
+        // حفظ بيانات المتقدم
         await addDoc(collection(window.db, 'applicants'), {
             userId: currentUser.uid,
             name: userName,
@@ -420,37 +434,33 @@ async function applyForJob(jobId) {
             jobCity: job?.city || '',
             cvUrl: cvUrl,
             cvFileName: cvFileName,
+            cvSize: cvFileInput.files[0]?.size || 0,
             status: 'جديد',
             appliedAt: serverTimestamp(),
             createdAt: serverTimestamp()
         });
         
-        showToast(`✅ تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح! 🎉`, 'success');
+        showToast(`🎉 تم تقديم طلبك لوظيفة "${job?.title || ''}" بنجاح!`, 'success');
         
         if (applyBtn) {
             applyBtn.innerHTML = '<i class="fas fa-check"></i> تم التقديم بنجاح';
             applyBtn.style.background = '#10b981';
-            applyBtn.style.opacity = '1';
-            applyBtn.style.cursor = 'default';
             applyBtn.disabled = true;
         }
         
         setTimeout(() => closeModal('jobDetailModal'), 2000);
         
     } catch (error) {
-        console.error('خطأ:', error);
-        showToast('❌ ' + (error.message || 'فشل التقديم'), 'error');
+        console.error('خطأ في التقديم:', error);
+        showToast(error.message || '❌ فشل التقديم، حاول مرة أخرى', 'error');
         
         if (applyBtn) {
             applyBtn.disabled = false;
             applyBtn.innerHTML = originalBtnText;
             applyBtn.style.opacity = '1';
-            applyBtn.style.cursor = 'pointer';
-            applyBtn.style.background = '';
         }
     }
 }
-
 function toggleSaveJob(jobId) {
     const jobIdStr = String(jobId);
     if (savedJobs.includes(jobIdStr)) {
