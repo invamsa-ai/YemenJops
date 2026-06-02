@@ -355,16 +355,18 @@ async function startApplication(jobId) {
 // عرض نموذج الدفع
 // ============================================
 // عرض نموذج الدفع - نسخة بالصور
+// عرض نموذج الدفع - نسخة بالصور فقط (بدون أسماء)
 function showPaymentModal() {
     if (!pendingApplication) {
         showToast('لا توجد طلبات معلقة', 'error');
         return;
     }
     
+    // تعديل هنا: عرض الصور فقط بدون الأسماء
     const walletsHTML = Object.entries(wallets).map(([key, wallet]) => `
         <div class="wallet-option" onclick="showWalletDetails('${key}')" style="cursor:pointer; text-align:center; padding:15px; border:2px solid var(--border); border-radius:var(--radius-md); transition:all 0.3s; background:white;">
-            <img src="${wallet.image}" alt="${wallet.name}" style="width:48px; height:48px; object-fit:contain; margin-bottom:8px;" onerror="this.src='https://via.placeholder.com/48?text=${key}'">
-            <h4 style="margin:8px 0 0 0; font-size:0.9rem;">${wallet.name}</h4>
+            <img src="${wallet.image}" alt="${wallet.name}" style="width:64px; height:64px; object-fit:contain; margin-bottom:0px;" onerror="this.src='https://via.placeholder.com/64?text=${key}'">
+            <!-- تم إخفاء اسم المحفظة -->
         </div>
     `).join('');
     
@@ -388,10 +390,10 @@ function showPaymentModal() {
                     </div>
                 </div>
                 
-                <!-- اختيار المحفظة -->
+                <!-- اختيار المحفظة - صور فقط -->
                 <div style="margin-bottom:20px;">
                     <h4 style="margin-bottom:15px;"><i class="fas fa-exchange-alt"></i> اختر طريقة الدفع:</h4>
-                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
                         ${walletsHTML}
                     </div>
                 </div>
