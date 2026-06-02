@@ -417,9 +417,7 @@ function showWalletDetails(walletKey) {
         <div style="text-align:center; margin-bottom:15px;">
             <img src="${wallet.qrCode}" alt="QR Code" style="width:150px; height:150px; border-radius:12px; margin-bottom:10px;">
             <div>
-                <button class="btn btn-outline btn-sm" onclick="copyToClipboard('${wallet.number}')" style="margin-top:5px;">
-                    <i class="fas fa-copy"></i> تحميل الباركود
-                </button>
+               
             </div>
         </div>
         <div style="background:white; padding:12px; border-radius:var(--radius-sm); margin-bottom:10px;">
