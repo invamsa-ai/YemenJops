@@ -188,7 +188,7 @@ body {
 
 /* ============ HERO SECTION ============ */
 .hero {
-    background: linear-gradient(rgba(13, 107, 79, 0.85), rgba(13, 107, 79, 0.9)), url('../images/hero-bg.jpg');
+    background: linear-gradient(rgba(13, 107, 79, 0.85), rgba(13, 107, 79, 0.9)), url('./hero-bg.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
