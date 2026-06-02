@@ -350,7 +350,7 @@ function showPaymentModal() {
                 <h2 style="text-align:center;"><i class="fas fa-credit-card"></i> إتمام التقديم</h2>
                 
                 <!-- بطاقة بيانات الطلب -->
-                <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; padding:20px; border-radius:var(--radius-md); margin-bottom:20px;">
+                <div style="background: #0d6b4f; color:white; padding:20px; border-radius:var(--radius-md); margin-bottom:20px;">
                     <h3 style="color:white; margin-bottom:15px;">📋 تفاصيل طلبك</h3>
                     <p><i class="fas fa-briefcase"></i> <strong>الوظيفة:</strong> ${pendingApplication.jobTitle}</p>
                     <p><i class="fas fa-building"></i> <strong>الشركة:</strong> ${pendingApplication.jobCompany}</p>
