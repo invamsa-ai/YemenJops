@@ -851,16 +851,23 @@ async function handleLogin(event) {
 async function handleRegister(event) {
     event.preventDefault();
     const name = document.getElementById('regName')?.value.trim();
+    const phone = document.getElementById('regPhone')?.value.trim();
     const email = document.getElementById('regEmail')?.value.trim();
     const password = document.getElementById('regPassword')?.value;
     const city = document.getElementById('regCity')?.value;
-    const role = document.getElementById('regRole')?.value;
-    const phone = document.getElementById('regPhone')?.value || '';
 
-    if (!name || !email || !password) {
+    if (!name || !phone || !email || !password) {
         showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
         return;
     }
+    
+    // التحقق من صحة رقم الهاتف
+    const phoneRegex = /^[0-9]{9,10}$/;
+    if (!phoneRegex.test(phone)) {
+        showToast('يرجى إدخال رقم هاتف صحيح (9-10 أرقام)', 'error');
+        return;
+    }
+    
     if (password.length < 6) {
         showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
         return;
@@ -873,11 +880,11 @@ async function handleRegister(event) {
             if (window.db) {
                 await addDoc(collection(window.db, 'users'), {
                     uid: userCredential.user.uid,
-                    name,
-                    email,
-                    phone,
-                    city,
-                    role,
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    city: city,
+                    role: 'باحث عن عمل',  // القيمة ثابتة الآن
                     createdAt: serverTimestamp()
                 });
             }
