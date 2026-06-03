@@ -962,11 +962,39 @@ body {
         box-shadow: var(--shadow-lg);
         z-index: 999;
     }
+      .navbar-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+     /* الشعار في أقصى اليسار */
+    .navbar-brand {
+        flex-shrink: 0;
+        margin-left: 0;
+    }
+       .nav-actions {
+        display: flex;
+        gap: 8px;
+        margin-right: auto;  /* يحرك الأزرار تجاه زر القائمة */
+        margin-left: 10px;   /* مسافة من الشعار */
+    }
+    
+    /* تصغير حجم الأزرار في الجوال */
+    .nav-actions .btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+      
     .nav-links.open {
         display: flex;
     }
-    .menu-toggle {
+       .menu-toggle {
         display: block;
+        flex-shrink: 0;
+        margin-right: 0;
+        margin-left: 0;
     }
     .search-container {
         flex-direction: column;
@@ -1014,12 +1042,33 @@ body {
     }
 }
 @media (max-width: 480px) {
-    .navbar-inner {
-        padding: 0 12px;
-        height: 56px;
+   .navbar-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
     }
+    
     .navbar-brand {
         font-size: 1.2rem;
+    }
+     .nav-actions {
+        display: flex;
+        gap: 8px;
+        margin-right: auto;  /* يحرك الأزرار تجاه زر القائمة */
+        margin-left: 10px;   /* مسافة من الشعار */
+    }
+       .nav-actions .btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+    /* زر الهمبرجر - في أقصى اليمين */
+    .menu-toggle {
+        display: block;
+        flex-shrink: 0;
+        margin-right: 0;
+        margin-left: 0;
     }
     .navbar-brand .brand-icon {
         width: 32px;
