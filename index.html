@@ -322,57 +322,55 @@
         </div>
     </div>
 
-    <!-- ============ REGISTER MODAL ============ -->
-    <div class="modal-overlay" id="registerModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
-            <h2><i class="fas fa-user-plus"></i> إنشاء حساب جديد</h2>
-            <form id="registerForm" onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label>الاسم الكامل</label>
-                    <input type="text" id="regName" placeholder="أدخل اسمك الكامل" required>
-                </div>
-                <div class="form-group">
-                    <label>البريد الإلكتروني</label>
-                    <input type="email" id="regEmail" placeholder="أدخل بريدك الإلكتروني" required>
-                </div>
-                <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="regPassword" placeholder="اختر كلمة مرور قوية" required minlength="6">
-                </div>
-                <div class="form-group">
-                    <label>المدينة</label>
-                    <select id="regCity">
-                        <option value="">اختر مدينتك</option>
-                        <option value="صنعاء">صنعاء</option>
-                        <option value="عدن">عدن</option>
-                        <option value="تعز">تعز</option>
-                        <option value="الحديدة">الحديدة</option>
-                        <option value="إب">إب</option>
-                        <option value="المكلا">المكلا</option>
-                        <option value="سيئون">سيئون</option>
-                        <option value="ذمار">ذمار</option>
-                        <option value="عمران">عمران</option>
-                        <option value="مأرب">مأرب</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>أنا:</label>
-                    <select id="regRole">
-                        <option value="باحث عن عمل">باحث عن عمل</option>
-                        <option value="صاحب عمل">صاحب عمل</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block btn-lg">
-                    <i class="fas fa-user-plus"></i> إنشاء الحساب
-                </button>
-            </form>
-            <p class="modal-footer-text">
-                لديك حساب بالفعل؟ <a onclick="switchModal('registerModal','loginModal')">سجل دخول</a>
-            </p>
-        </div>
+   <!-- ============ REGISTER MODAL ============ -->
+<div class="modal-overlay" id="registerModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+        <h2><i class="fas fa-user-plus"></i> إنشاء حساب جديد</h2>
+        <form id="registerForm" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label>الاسم الكامل <span style="color:red;">*</span></label>
+                <input type="text" id="regName" placeholder="أدخل اسمك الكامل" required>
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف <span style="color:red;">*</span></label>
+                <input type="tel" id="regPhone" placeholder="أدخل رقم هاتفك (مثال: 771234567)" required pattern="[0-9]{9,10}" title="يرجى إدخال رقم هاتف صحيح مكون من 9-10 أرقام">
+                <small style="color:var(--text-muted);">مثال: 771234567 أو 777123456</small>
+            </div>
+            <div class="form-group">
+                <label>البريد الإلكتروني <span style="color:red;">*</span></label>
+                <input type="email" id="regEmail" placeholder="أدخل بريدك الإلكتروني" required>
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور <span style="color:red;">*</span></label>
+                <input type="password" id="regPassword" placeholder="اختر كلمة مرور قوية (6 أحرف على الأقل)" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label>المدينة <span style="color:red;">*</span></label>
+                <select id="regCity" required>
+                    <option value="">اختر مدينتك</option>
+                    <option value="صنعاء">صنعاء</option>
+                    <option value="عدن">عدن</option>
+                    <option value="تعز">تعز</option>
+                    <option value="الحديدة">الحديدة</option>
+                    <option value="إب">إب</option>
+                    <option value="المكلا">المكلا</option>
+                    <option value="سيئون">سيئون</option>
+                    <option value="ذمار">ذمار</option>
+                    <option value="عمران">عمران</option>
+                    <option value="مأرب">مأرب</option>
+                </select>
+            </div>
+            <!-- تم إزالة حقل "أنا:" (باحث عن عمل / صاحب عمل) -->
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fas fa-user-plus"></i> إنشاء الحساب
+            </button>
+        </form>
+        <p class="modal-footer-text">
+            لديك حساب بالفعل؟ <a onclick="switchModal('registerModal','loginModal')">سجل دخول</a>
+        </p>
     </div>
-
+</div>
     <!-- ============ ABOUT MODAL ============ -->
     <div class="modal-overlay" id="aboutModal">
         <div class="modal">
