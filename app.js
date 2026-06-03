@@ -699,11 +699,12 @@ function showSuccessMessage() {
 // ============================================
 // استعادة الطلب المعلق بعد تحديث الصفحة
 // ============================================
+// استعادة الطلب المعلق بعد تحديث الصفحة - تم إلغاء هذه الميزة
 function checkPendingApplication() {
-    if (pendingApplication && currentUser && pendingApplication.userId === currentUser.uid) {
-        showToast('📋 يوجد طلب قيد الإكمال، استكمل عملية الدفع', '');
-        setTimeout(() => showPaymentModal(), 1000);
-    }
+    // تم إلغاء هذه الميزة - لن تظهر رسالة الطلب المعلق
+    // إذا أردت مسح أي طلب معلق موجود، قم بإلغاء التعليق على السطر التالي:
+    // localStorage.removeItem('pendingApplication');
+    return;
 }
 
 // ============================================
@@ -833,7 +834,7 @@ async function handleLogin(event) {
             showToast(`مرحباً بعودتك! 👋`, 'success');
             closeModal('loginModal');
             updateNavForLoggedInUser();
-            checkPendingApplication();
+            // checkPendingApplication();
         } catch (error) {
             console.error('خطأ في تسجيل الدخول:', error);
             if (error.code === 'auth/invalid-credential') {
@@ -1446,7 +1447,7 @@ async function init() {
             if (user) {
                 currentUser = user;
                 updateNavForLoggedInUser();
-                checkPendingApplication();
+                // checkPendingApplication();
             } else {
                 currentUser = null;
             }
