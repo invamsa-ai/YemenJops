@@ -747,13 +747,13 @@ body {
     font-size: 0.9rem;
     color: var(--text-light);
 }
-
-/* ============ FOOTER ============ */
+/* ============ FOOTER - نسخة بسيطة ============ */
 .footer {
-    background: #0d6b4f;
-    color: #d1d5db;
+    background: var(--primary-dark);
+    color: rgba(255, 255, 255, 0.8);
     padding: 48px 24px 24px;
 }
+
 .footer-inner {
     max-width: 1300px;
     margin: 0 auto;
@@ -761,34 +761,41 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 30px;
 }
+
 .footer-col h4 {
-    color: #fff;
+    color: #ffffff;
     font-weight: 700;
     margin-bottom: 14px;
     font-size: 1.05rem;
 }
+
 .footer-col ul {
     list-style: none;
 }
+
 .footer-col ul li {
     margin-bottom: 8px;
 }
+
 .footer-col ul li a {
-    color: #9ca3af;
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     font-size: 0.9rem;
     transition: var(--transition);
 }
+
 .footer-col ul li a:hover {
-    color: #fff;
+    color: var(--secondary);
+    padding-right: 5px;
 }
+
 .footer-bottom {
     text-align: center;
     margin-top: 36px;
     padding-top: 20px;
-    border-top: 1px solid #374151;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 0.85rem;
-    color: #6b7280;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 /* ============ MODALS ============ */
