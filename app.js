@@ -666,6 +666,9 @@ async function saveApplicationToFirestore(proofBase64, fileName) {
 // ============================================
 // عرض رسالة الطمأنة
 // ============================================
+// ============================================
+// عرض رسالة الطمأنة - نسخة بزر واحد أزرق
+// ============================================
 function showSuccessMessage() {
     const messageHTML = `
         <div class="modal-overlay active" id="successModal" onclick="if(event.target===this)closeModal('successModal')">
@@ -673,13 +676,14 @@ function showSuccessMessage() {
                 <button class="modal-close" onclick="closeModal('successModal')">&times;</button>
                 <div style="background:linear-gradient(135deg, #10b981, #059669); color:white; padding:30px; border-radius:var(--radius-md); margin:-20px -20px 20px -20px;">
                     <i class="fas fa-check-circle" style="font-size:64px;"></i>
-                    <h2 style="color:white; margin-top:10px;">تم التقديم بنجاح!</h2>
+                    <h2 style="color:white; margin-top:10px;">تم التقديم بنجاح</h2>
                 </div>
                 <p style="font-size:1.1rem; margin-bottom:15px;">✅ طلبك قيد المراجعة</p>
+                <p style="color:var(--text-medium);">يرجى إرسال سيرتك الذاتية إلى حسابنا على تيليجرام</p>
                 <p style="color:var(--text-medium);">سيتم التواصل معك عبر رسالة نصية (SMS) فور تأكيد طلبك للوظيفة</p>
                 <hr style="margin:20px 0;">
-                <button class="btn btn-primary" onclick="closeModal('successModal')">
-                    <i class="fas fa-check"></i> حسناً
+                <button class="btn btn-primary" onclick="sendToTelegram()" style="background:linear-gradient(135deg, #0088cc, #006699); border:none;">
+                    <i class="fab fa-telegram"></i> إرسال السيرة الذاتية
                 </button>
             </div>
         </div>
@@ -690,10 +694,25 @@ function showSuccessMessage() {
     document.body.insertAdjacentHTML('beforeend', messageHTML);
     document.getElementById('successModal').classList.add('active');
     
+    // إغلاق تلقائي بعد 10 ثوانٍ
     setTimeout(() => {
         const modal = document.getElementById('successModal');
         if (modal) modal.classList.remove('active');
-    }, 5000);
+    }, 10000);
+}
+
+// دالة إرسال السيرة الذاتية إلى تيليجرام
+function sendToTelegram() {
+    // رابط التيليجرام الخاص بحساب الدعم (يمكنك تغيير الرابط)
+    const telegramLink = "https://t.me/shaghalni_bot"; // ضع رابط حساب التيليجرام الخاص بك هنا
+    
+    // فتح التيليجرام في نافذة جديدة
+    window.open(telegramLink, "_blank");
+    
+    // إغلاق النافذة الحالية بعد فتح التيليجرام
+    setTimeout(() => {
+        closeModal('successModal');
+    }, 500);
 }
 
 // ============================================
