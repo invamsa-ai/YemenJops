@@ -26,7 +26,16 @@
                 <span class="brand-icon"><i class="fas fa-briefcase"></i></span>
                 شغلي
             </a>
-            <button class="menu-toggle" id="menuToggle" aria-label="القائمة">
+       
+            <div class="nav-actions">
+                <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">
+                    <i class="fas fa-sign-in-alt"></i> دخول
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">
+                    <i class="fas fa-user-plus"></i> تسجيل
+                </button>
+            </div>
+                 <button class="menu-toggle" id="menuToggle" aria-label="القائمة">
                 <i class="fas fa-bars"></i>
             </button>
             <ul class="nav-links" id="navLinks">
@@ -36,14 +45,6 @@
                 <li><a href="#categories-section" data-nav="categories">التخصصات</a></li>
                 <li><a href="#" onclick="openModal('aboutModal')">عن شغلي</a></li>
             </ul>
-            <div class="nav-actions">
-                <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">
-                    <i class="fas fa-sign-in-alt"></i> دخول
-                </button>
-                <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">
-                    <i class="fas fa-user-plus"></i> تسجيل
-                </button>
-            </div>
         </div>
     </nav>
 
