@@ -65,33 +65,13 @@ const jobCategories = [
 // بيانات المحافظ الإلكترونية
 // استبدال بيانات المحافظ الإلكترونية (wallets) بهذا الكود:
 const wallets = {
-    'جوال': { 
-        name: 'جوال - Mobile Money', 
-        number: '770123456', 
-        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=770123456', 
-        recipient: 'شغلي للتشغيل والخدمات',
-        image: 'jawal.png' // ضع مسار صورتك هنا
-    },
-    'كاش': { 
-        name: 'كاش - Cash', 
-        number: '780123456', 
-        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=780123456', 
-        recipient: 'شغلي للتشغيل والخدمات',
-        image: 'cash.png' // ضع مسار صورتك هنا
-    },
+ 
     'جيب': { 
         name: 'جيب - Jeeb', 
         number: '4711087', 
-'jeeb-qr-code.png',
+ qrCode: 'jeeb-qr-code.png',
         recipient: 'شغلي للتشغيل والخدمات',
         image: 'jeeb.png' // ضع مسار صورتك هنا
-    },
-    'فلوسك': { 
-        name: 'فلوسك - Floosak', 
-        number: '771234567', 
-        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=771234567', 
-        recipient: 'شغلي للتشغيل والخدمات',
-        image: 'floosak.png' // ضع مسار صورتك هنا
     }
 };
 const APPLICATION_FEE = 1000; // 1000 ريال يمني
@@ -356,25 +336,25 @@ async function startApplication(jobId) {
 // ============================================
 // عرض نموذج الدفع - نسخة بالصور
 // عرض نموذج الدفع - نسخة بالصور فقط (بدون أسماء)
+// عرض نموذج الدفع - نسخة بمحفظة واحدة فقط مع التنبيهات
 function showPaymentModal() {
     if (!pendingApplication) {
         showToast('لا توجد طلبات معلقة', 'error');
         return;
     }
     
-    // تعديل هنا: عرض الصور فقط بدون الأسماء
-    const walletsHTML = Object.entries(wallets).map(([key, wallet]) => `
-        <div class="wallet-option" onclick="showWalletDetails('${key}')" style="cursor:pointer; text-align:center; padding:15px; border:2px solid var(--border); border-radius:var(--radius-md); transition:all 0.3s; background:white;">
-            <img src="${wallet.image}" alt="${wallet.name}" style="width:64px; height:64px; object-fit:contain; margin-bottom:0px;" onerror="this.src='https://via.placeholder.com/64?text=${key}'">
-            <!-- تم إخفاء اسم المحفظة -->
-        </div>
-    `).join('');
-    
     const paymentHTML = `
         <div class="modal-overlay active" id="paymentModal" onclick="if(event.target===this)closeModal('paymentModal')">
             <div class="modal" style="max-width:550px;text-align:right;">
                 <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
                 <h2 style="text-align:center;"><i class="fas fa-credit-card"></i> إتمام التقديم</h2>
+                
+                <!-- تنبيه عدم استرداد المبلغ -->
+                <div style="background: #dc2626; color:white; padding:15px; border-radius:var(--radius-md); margin-bottom:20px; text-align:center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:24px; margin-bottom:10px; display:block;"></i>
+                    <strong style="font-size:1.1rem;">تنبيه هام:</strong>
+                    <p style="margin:8px 0 0 0; font-size:0.9rem;">رسوم التقديم ${APPLICATION_FEE.toLocaleString()} ريال غير قابلة للاسترداد سواء تم قبولك في الوظيفة أم لا.</p>
+                </div>
                 
                 <!-- بطاقة بيانات الطلب -->
                 <div style="background: #0d6b4f; color:white; padding:20px; border-radius:var(--radius-md); margin-bottom:20px;">
@@ -390,12 +370,22 @@ function showPaymentModal() {
                     </div>
                 </div>
                 
-                <!-- اختيار المحفظة - صور فقط -->
+                <!-- طريقة الدفع - محفظة جيب فقط -->
                 <div style="margin-bottom:20px;">
-                    <h4 style="margin-bottom:15px;"><i class="fas fa-exchange-alt"></i> اختر طريقة الدفع:</h4>
-                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
-                        ${walletsHTML}
+                    <h4 style="margin-bottom:15px;"><i class="fas fa-exchange-alt"></i> طريقة الدفع المتاحة:</h4>
+                    <div style="display:grid; grid-template-columns:1fr; gap:15px;">
+                        <div class="wallet-option" onclick="showWalletDetails('جيب')" style="cursor:pointer; text-align:center; padding:20px; border:2px solid var(--primary); border-radius:var(--radius-md); transition:all 0.3s; background:linear-gradient(135deg, #f8f9fa, #fff);">
+                            <img src="${wallets['جيب'].image}" alt="جيب" style="width:80px; height:80px; object-fit:contain; margin-bottom:10px;" onerror="this.src='https://via.placeholder.com/80?text=Jeeb'">
+                            <h3 style="margin:10px 0 5px 0; color:var(--primary);">محفظة جيب - Jeeb</h3>
+                            <p style="color:var(--text-medium); font-size:0.85rem;">الدفع عبر محفظة جيب الإلكترونية</p>
+                        </div>
                     </div>
+                </div>
+                
+                <!-- رسالة تطوير المحافظ الأخرى -->
+                <div style="background: #fef3c7; color:#92400e; padding:12px; border-radius:var(--radius-md); margin-bottom:20px; text-align:center; border-right:4px solid #f59e0b;">
+                    <i class="fas fa-code-branch"></i>
+                    <strong>قريباً:</strong> سيتم إضافة المزيد من طرق الدفع (كاش، جوال، فلوسك) في التحديثات القادمة
                 </div>
                 
                 <!-- تفاصيل المحفظة (تظهر عند الاختيار) -->
@@ -407,12 +397,12 @@ function showPaymentModal() {
                 <div id="confirmPaymentSection" style="display:none;">
                     <div class="form-group">
                         <label><i class="fas fa-hashtag"></i> رقم العملية / الرقم المرجعي <span style="color:red;">*</span></label>
-                        <input type="text" id="transactionRef" class="form-input" placeholder="أدخل رقم العملية من تطبيق المحفظة" required>
+                        <input type="text" id="transactionRef" class="form-input" placeholder="أدخل رقم العملية من تطبيق جيب" required>
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-image"></i> إرفاق صورة إشعار التحويل <span style="color:red;">*</span></label>
                         <input type="file" id="paymentProof" accept="image/*,.pdf" class="form-input">
-                        <small style="color:var(--text-muted);">صورة من عملية التحويل (jpg, png, pdf)</small>
+                        <small style="color:var(--text-muted);">صورة من عملية التحويل من تطبيق جيب (jpg, png, pdf)</small>
                     </div>
                     <button class="btn btn-primary btn-block btn-lg" onclick="confirmPayment()" id="confirmPaymentBtn">
                         <i class="fas fa-check-circle"></i> تأكيد الدفع وإرسال الطلب
@@ -431,6 +421,7 @@ function showPaymentModal() {
 // عرض تفاصيل المحفظة المختارة
 // ============================================
 // عرض تفاصيل المحفظة المختارة مع الصورة
+// عرض تفاصيل محفظة جيب
 function showWalletDetails(walletKey) {
     const wallet = wallets[walletKey];
     if (!wallet) return;
@@ -449,7 +440,7 @@ function showWalletDetails(walletKey) {
         </div>
         <div style="background:white; padding:12px; border-radius:var(--radius-sm); margin-bottom:10px;">
             <p><strong><i class="fas fa-user-circle"></i> المستفيد:</strong> ${wallet.recipient}</p>
-            <p><strong><i class="fas fa-mobile-alt"></i> رقم المحفظة:</strong> ${wallet.number}</p>
+            <p><strong><i class="fas fa-mobile-alt"></i> رقم محفظة جيب:</strong> ${wallet.number}</p>
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button class="btn btn-primary btn-sm" onclick="copyToClipboard('${wallet.number}')" style="flex:1;">
                     <i class="fas fa-copy"></i> نسخ الرقم
@@ -459,8 +450,14 @@ function showWalletDetails(walletKey) {
                 </button>
             </div>
         </div>
-        <div style="background:#e8f5e9; padding:12px; border-radius:var(--radius-sm); text-align:center;">
-            <i class="fas fa-info-circle"></i> يرجى تحويل المبلغ <strong>${APPLICATION_FEE.toLocaleString()} ريال</strong> إلى الرقم أعلاه، ثم إدخال بيانات التحويل بالأسفل
+        <!-- تنبؤ إضافي بعدم استرداد المبلغ -->
+        <div style="background:#fee2e2; padding:12px; border-radius:var(--radius-sm); text-align:center; border:1px solid #fecaca;">
+            <i class="fas fa-exclamation-circle" style="color:#dc2626;"></i>
+            <strong style="color:#991b1b;">تنبيه: الرسوم غير قابلة للاسترداد</strong>
+            <p style="margin:5px 0 0 0; font-size:0.8rem; color:#7f1d1d;">لن يتم استرداد مبلغ ${APPLICATION_FEE.toLocaleString()} ريال حتى لو لم يتم قبول طلبك</p>
+        </div>
+        <div style="background:#e8f5e9; padding:12px; border-radius:var(--radius-sm); text-align:center; margin-top:10px;">
+            <i class="fas fa-info-circle"></i> يرجى تحويل المبلغ <strong>${APPLICATION_FEE.toLocaleString()} ريال</strong> إلى رقم محفظة جيب أعلاه، ثم إدخال بيانات التحويل بالأسفل
         </div>
     `;
     
@@ -470,7 +467,6 @@ function showWalletDetails(walletKey) {
     // حفظ المحفظة المختارة
     window.selectedWallet = walletKey;
 }
-
 // ============================================
 // نسخ النص للحافظة
 // ============================================
