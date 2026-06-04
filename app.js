@@ -82,7 +82,7 @@ const wallets = {
     'جيب': { 
         name: 'جيب - Jeeb', 
         number: '4711087', 
-'images/jeeb-qr-code.png',
+'jeeb-qr-code.png',
         recipient: 'شغلي للتشغيل والخدمات',
         image: 'jeeb.png' // ضع مسار صورتك هنا
     },
