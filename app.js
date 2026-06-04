@@ -81,8 +81,8 @@ const wallets = {
     },
     'جيب': { 
         name: 'جيب - Jeeb', 
-        number: '790123456', 
-        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=790123456', 
+        number: '4711087', 
+'images/jeeb-qr-code.png',
         recipient: 'شغلي للتشغيل والخدمات',
         image: 'jeeb.png' // ضع مسار صورتك هنا
     },
