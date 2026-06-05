@@ -45,7 +45,7 @@ window.addEventListener('load', () => {
     setTimeout(() => {
         const toast = document.getElementById('toast');
         if (toast && !window.authAvailable) {
-            showToast('⚠️ بعض الخدمات غير متاحة حالياً، جاري العمل على حلها', 'warning');
+            // showToast('⚠️ بعض الخدمات غير متاحة حالياً، جاري العمل على حلها', 'warning');
         }
     }, 3000);
 });
