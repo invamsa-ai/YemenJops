@@ -42,14 +42,63 @@ const ADMIN_PASSWORD = 'admin1112004admin';
 let adminJobs = [];
 let adminApplications = []; // تغيير من applicants إلى applications
 let adminCompanies = [];
+// ============================================
+// LOADING INDICATOR
+// ============================================
+function showLoading() {
+    let loadingEl = document.getElementById('globalLoading');
+    if (!loadingEl) {
+        loadingEl = document.createElement('div');
+        loadingEl.id = 'globalLoading';
+        loadingEl.className = 'loading-overlay';
+        loadingEl.innerHTML = `
+            <div style="text-align:center;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">جاري التحميل...</div>
+            </div>
+        `;
+        document.body.appendChild(loadingEl);
+    }
+    loadingEl.style.display = 'flex';
+}
 
+function hideLoading() {
+    const loadingEl = document.getElementById('globalLoading');
+    if (loadingEl) loadingEl.style.display = 'none';
+}
+
+// ============================================
+// CACHE MANAGEMENT (لتحسين السرعة)
+// ============================================
+let cache = {
+    jobs: { data: null, timestamp: 0, ttl: 30000 },
+    applications: { data: null, timestamp: 0, ttl: 30000 },
+    companies: { data: null, timestamp: 0, ttl: 60000 }
+};
+
+function refreshCache() {
+    cache.jobs.data = null;
+    cache.applications.data = null;
+    cache.companies.data = null;
+    console.log('🔄 تم تحديث الكاش');
+}
 // ============================================
 // FIREBASE OPERATIONS
 // ============================================
 
 // جلب جميع الوظائف
-async function fetchJobs() {
+async function fetchJobs(forceRefresh = false) {
+    const now = Date.now();
+    
+    if (!forceRefresh && cache.jobs.data && (now - cache.jobs.timestamp) < cache.jobs.ttl) {
+        console.log('📦 استخدام الكاش للوظائف');
+        return cache.jobs.data;
+    }
+    
+    showLoading();
+    
     if (!firebaseReady || !db) {
+        hideLoading();
         return JSON.parse(localStorage.getItem('adminJobs') || '[]');
     }
     
@@ -61,16 +110,30 @@ async function fetchJobs() {
         snapshot.forEach(doc => {
             jobs.push({ id: doc.id, ...doc.data() });
         });
+        
+        cache.jobs = { data: jobs, timestamp: now, ttl: cache.jobs.ttl };
+        
+        hideLoading();
         return jobs;
     } catch (error) {
+        hideLoading();
         console.error('خطأ في جلب الوظائف:', error);
         return JSON.parse(localStorage.getItem('adminJobs') || '[]');
     }
 }
-
 // جلب جميع الطلبات (applications) - هذا هو الجدول الجديد
-async function fetchApplications() {
+async function fetchApplications(forceRefresh = false) {
+    const now = Date.now();
+    
+    if (!forceRefresh && cache.applications.data && (now - cache.applications.timestamp) < cache.applications.ttl) {
+        console.log('📦 استخدام الكاش للطلبات');
+        return cache.applications.data;
+    }
+    
+    showLoading();
+    
     if (!firebaseReady || !db) {
+        hideLoading();
         return JSON.parse(localStorage.getItem('adminApplications') || '[]');
     }
     
@@ -82,16 +145,30 @@ async function fetchApplications() {
         snapshot.forEach(doc => {
             applications.push({ id: doc.id, ...doc.data() });
         });
+        
+        cache.applications = { data: applications, timestamp: now, ttl: cache.applications.ttl };
+        
+        hideLoading();
         return applications;
     } catch (error) {
+        hideLoading();
         console.error('خطأ في جلب الطلبات:', error);
         return JSON.parse(localStorage.getItem('adminApplications') || '[]');
     }
 }
-
 // جلب جميع الشركات
-async function fetchCompanies() {
+async function fetchCompanies(forceRefresh = false) {
+    const now = Date.now();
+    
+    if (!forceRefresh && cache.companies.data && (now - cache.companies.timestamp) < cache.companies.ttl) {
+        console.log('📦 استخدام الكاش للشركات');
+        return cache.companies.data;
+    }
+    
+    showLoading();
+    
     if (!firebaseReady || !db) {
+        hideLoading();
         return JSON.parse(localStorage.getItem('adminCompanies') || '[]');
     }
     
@@ -102,8 +179,13 @@ async function fetchCompanies() {
         snapshot.forEach(doc => {
             companies.push({ id: doc.id, ...doc.data() });
         });
+        
+        cache.companies = { data: companies, timestamp: now, ttl: cache.companies.ttl };
+        
+        hideLoading();
         return companies;
     } catch (error) {
+        hideLoading();
         console.error('خطأ في جلب الشركات:', error);
         return JSON.parse(localStorage.getItem('adminCompanies') || '[]');
     }
@@ -389,11 +471,18 @@ async function switchPage(pageName, navItem) {
 // DASHBOARD
 // ============================================
 async function loadDashboard() {
-    adminJobs = await fetchJobs();
-    adminApplications = await fetchApplications();
-    adminCompanies = await fetchCompanies();
+    showLoading();
     
-    // تحديث الإحصائيات
+    const [jobs, applications, companies] = await Promise.all([
+        fetchJobs(),
+        fetchApplications(),
+        fetchCompanies()
+    ]);
+    
+    adminJobs = jobs;
+    adminApplications = applications;
+    adminCompanies = companies;
+    
     const totalJobsEl = document.getElementById('totalJobs');
     const totalApplicantsEl = document.getElementById('totalApplicants');
     const totalCompaniesEl = document.getElementById('totalCompanies');
@@ -403,11 +492,9 @@ async function loadDashboard() {
     if (totalApplicantsEl) totalApplicantsEl.textContent = adminApplications.length;
     if (totalCompaniesEl) totalCompaniesEl.textContent = adminCompanies.length;
     
-    // حساب إجمالي الإيرادات (1000 ريال لكل طلب)
     const totalRevenue = adminApplications.length * 1000;
     if (totalRevenueEl) totalRevenueEl.textContent = totalRevenue.toLocaleString() + ' ر.ي';
     
-    // تحديث العدادات في الشريط الجانبي
     const jobsCountEl = document.getElementById('jobsCount');
     const applicantsCountEl = document.getElementById('applicantsCount');
     const companiesCountEl = document.getElementById('companiesCount');
@@ -416,7 +503,6 @@ async function loadDashboard() {
     if (applicantsCountEl) applicantsCountEl.textContent = adminApplications.length;
     if (companiesCountEl) companiesCountEl.textContent = adminCompanies.length;
     
-    // آخر الوظائف
     const recentJobs = [...adminJobs].slice(-5).reverse();
     const recentJobsList = document.getElementById('recentJobsList');
     if (recentJobsList) {
@@ -434,7 +520,6 @@ async function loadDashboard() {
         `).join('') || '<p style="text-align:center;color:var(--text-muted);">لا توجد وظائف بعد</p>';
     }
     
-    // آخر الطلبات
     const recentApps = [...adminApplications].slice(-5).reverse();
     const recentAppsList = document.getElementById('recentApplicantsList');
     if (recentAppsList) {
@@ -451,8 +536,9 @@ async function loadDashboard() {
             </div>
         `).join('') || '<p style="text-align:center;color:var(--text-muted);">لا يوجد طلبات بعد</p>';
     }
+    
+    hideLoading();
 }
-
 function getStatusBadgeClass(status) {
     const classes = {
         'جديد': 'badge-new',
@@ -560,6 +646,7 @@ async function saveJob(event) {
     }
     
     if (success) {
+           refreshCache();
         closeModal('jobModal');
         await loadJobsTable();
         await loadDashboard();
@@ -571,6 +658,7 @@ async function deleteJobHandler(jobId) {
     
     const success = await deleteJob(jobId);
     if (success) {
+        refreshCache();
         showToast('تم حذف الوظيفة بنجاح', 'success');
         await loadJobsTable();
         await loadDashboard();
@@ -773,6 +861,7 @@ async function saveApplicationStatus(appId) {
     
     const success = await updateApplicationStatus(appId, newStatus, notes);
     if (success) {
+         refreshCache(); 
         showToast(`تم تحديث الحالة إلى "${newStatus}"`, 'success');
         closeModal('applicantDetailModal');
         await loadApplicationsTable();
@@ -785,6 +874,7 @@ async function saveApplicationStatus(appId) {
 async function changeApplicationStatus(appId, newStatus) {
     const success = await updateApplicationStatus(appId, newStatus);
     if (success) {
+         refreshCache();
         showToast(`تم تحديث الحالة إلى "${newStatus}"`, 'success');
         closeModal('applicantDetailModal');
         await loadApplicationsTable();
@@ -799,6 +889,7 @@ async function deleteApplicationHandler(appId) {
     
     const success = await deleteApplication(appId);
     if (success) {
+        refreshCache();
         showToast('تم حذف الطلب بنجاح', 'success');
         await loadApplicationsTable();
         await loadDashboard();
@@ -861,6 +952,7 @@ async function saveCompany(event) {
     
     const newCompany = await addCompany(companyData);
     if (newCompany) {
+        refreshCache();
         closeModal('companyModal');
         await loadCompaniesTable();
         await loadDashboard();
@@ -875,6 +967,7 @@ async function deleteCompanyHandler(companyId) {
     
     const success = await deleteCompany(companyId);
     if (success) {
+          refreshCache();
         showToast('تم حذف الشركة بنجاح', 'success');
         await loadCompaniesTable();
         await loadDashboard();
