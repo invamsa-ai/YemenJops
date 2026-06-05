@@ -18,12 +18,19 @@
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow">
     <meta name="google-site-verification" content="6YbDeo8HZdsJ84Y241kAzQn1QHx77EdKr8Bvi02xUVU" />
+    <!-- تحميل الخطوط بشكل أسرع -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" media="print" onload="this.media='all'">
+
+<!-- تحميل Font Awesome بشكل غير متزامن -->
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
     <!-- Open Graph Tags for Social Media -->
     <meta property="og:title" content="شغلي - أكبر منصة توظيف في اليمن">
     <meta property="og:description" content="ابحث عن وظيفة أحلامك في اليمن. آلاف الفرص الوظيفية في جميع المحافظات.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://shaghalni.com/og-image.jpg">
-    <meta property="og:url" content="https://shaghalni.com">
+    <meta property="og:image" content="https://yemenjops.onrender.com/og-image.jpg">
+    <meta property="og:url" content="https://yemenjops.onrender.com">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -36,10 +43,20 @@
     <!-- Google Fonts - Tajawal for Arabic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
-
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet"> -->
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Font Awesome Icons -->
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <style>
+    /* CSS الأساسي للجزء المرئي */
+    body { margin: 0; font-family: 'Tajawal', sans-serif; }
+    .navbar { background: #0d6b4f; padding: 15px 20px; }
+    .hero { padding: 60px 20px; text-align: center; background: linear-gradient(135deg, #0d6b4f, #084d38); color: white; }
+    .hero h1 { font-size: 2rem; margin-bottom: 20px; }
+    .btn-search { background: #f4a024; border: none; padding: 12px 24px; border-radius: 8px; color: white; }
+</style>
+<!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"> -->
     <link rel="stylesheet" href="style.css">
     
     <!-- Schema Markup for Job Board -->
@@ -48,13 +65,13 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "شغلي",
-      "url": "https://shaghalni.com",
+      "url": "https://yemenjops.onrender.com/",
       "description": "أكبر منصة توظيف في اليمن",
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": "https://shaghalni.com/?search={search_term_string}"
+          "urlTemplate": "https://yemenjops.onrender.com/?search={search_term_string}"
         },
         "query-input": "required name=search_term_string"
       }
@@ -95,7 +112,9 @@
     <!-- ============ HERO SECTION ============ -->
     <section class="hero">
         <div class="hero-inner">
-            <h1>أكبر موقع توظيف في <span class="highlight">اليمن</span></h1>
+<h1 style="font-weight: 800; font-size: clamp(2rem, 5vw, 3rem);" fetchpriority="high">
+    أكبر موقع توظيف في <span class="highlight">اليمن</span>
+</h1>
             <p>اكتشف آلاف الفرص الوظيفية في صنعاء، عدن، تعز، الحديدة، إب، المكلا وجميع المحافظات اليمنية. اربط بين الكفاءات اليمنية وأفضل جهات العمل في تكنولوجيا المعلومات، الهندسة، الصحة، التعليم، والمزيد.</p>
 
             <!-- Search Bar -->
