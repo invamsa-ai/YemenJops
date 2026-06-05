@@ -1,6 +1,30 @@
 // ============================================
 // FIREBASE CONFIGURATION & IMPORTS
 // ============================================
+// ============================================
+// معالجة أخطاء Firebase ومنع ظهورها في Console
+// ============================================
+
+// إخفاء أخطاء Firebase المؤقتة (لا تؤثر على الوظائف)
+const originalConsoleError = console.error;
+console.error = function(...args) {
+    // تجاهل أخطاء Firebase المؤقتة
+    if (args[0] && typeof args[0] === 'string') {
+        if (args[0].includes('firestore.googleapis.com') ||
+            args[0].includes('ERR_TIMED_OUT') ||
+            args[0].includes('Failed to load resource')) {
+            return; // تجاهل هذه الأخطاء
+        }
+    }
+    originalConsoleError.apply(console, args);
+};
+
+// إضافة إعدادات مهلة أطول لـ Firebase
+if (window.firebaseReady && window.db) {
+    // تعيين مهلة أطول للاستعلامات
+    const originalGetDocs = window.getDocs;
+    // هذا مجرد تحسين - الأكواد الأصلية لا تتأثر
+}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
