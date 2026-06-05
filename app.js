@@ -86,10 +86,54 @@ let savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
 let pendingApplication = JSON.parse(localStorage.getItem('pendingApplication') || 'null');
 
 // ============================================
+// LOADING INDICATOR
+// ============================================
+function showLoading() {
+    let loadingEl = document.getElementById('globalLoading');
+    if (!loadingEl) {
+        loadingEl = document.createElement('div');
+        loadingEl.id = 'globalLoading';
+        loadingEl.className = 'loading-overlay';
+        loadingEl.innerHTML = `
+            <div style="text-align:center;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">جاري التحميل...</div>
+            </div>
+        `;
+        document.body.appendChild(loadingEl);
+    }
+    loadingEl.style.display = 'flex';
+}
+
+function hideLoading() {
+    const loadingEl = document.getElementById('globalLoading');
+    if (loadingEl) loadingEl.style.display = 'none';
+}
+
+// ============================================
+// CACHE MANAGEMENT
+// ============================================
+let jobsCache = { data: null, timestamp: 0, ttl: 60000 }; // 60 ثانية
+
+function refreshJobsCache() {
+    jobsCache.data = null;
+    jobsCache.timestamp = 0;
+}
+// ============================================
 // FIREBASE OPERATIONS
 // ============================================
-async function fetchJobsFromFirebase() {
+async function fetchJobsFromFirebase(forceRefresh = false) {
+    const now = Date.now();
+    
+    if (!forceRefresh && jobsCache.data && (now - jobsCache.timestamp) < jobsCache.ttl) {
+        console.log('📦 استخدام الكاش للوظائف');
+        return jobsCache.data;
+    }
+    
+    showLoading();
+    
     if (!window.firebaseReady || !window.db) {
+        hideLoading();
         console.log('Firebase غير متصل - لا توجد بيانات');
         return [];
     }
@@ -102,14 +146,18 @@ async function fetchJobsFromFirebase() {
         snapshot.forEach(doc => {
             jobs.push({ id: doc.id, ...doc.data() });
         });
+        
+        jobsCache = { data: jobs, timestamp: now, ttl: jobsCache.ttl };
+        
+        hideLoading();
         console.log(`✅ تم جلب ${jobs.length} وظيفة من Firebase`);
         return jobs;
     } catch (error) {
+        hideLoading();
         console.warn('خطأ في جلب الوظائف:', error.message);
         return [];
     }
 }
-
 // ============================================
 // RENDER FUNCTIONS
 // ============================================
@@ -649,6 +697,7 @@ async function saveApplicationToFirestore(proofBase64, fileName) {
     };
     
     await addDoc(collection(window.db, 'applications'), applicationData);
+    refreshJobsCache();
     
     localStorage.removeItem('pendingApplication');
     pendingApplication = null;
