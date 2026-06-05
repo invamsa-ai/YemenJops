@@ -1402,3 +1402,109 @@ input.form-input:focus, select.form-input:focus {
     font-family: var(--font-family);
     color: var(--primary);
 }
+
+/* ============================================ */
+/* حل نهائي لمشكلة الأيقونات على الهواتف */
+/* ============================================ */
+
+/* إعادة تعيين عرض الأيقونات */
+i, 
+.fa, 
+.fas, 
+.far, 
+.fal, 
+.fad, 
+.fab,
+[class*=" fa-"],
+[class^="fa-"] {
+    display: inline-block !important;
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome", sans-serif !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* أيقونات فارغة - ضمان العرض */
+.fa:empty,
+.fas:empty,
+.far:empty {
+    min-width: 1em;
+    min-height: 1em;
+}
+
+/* تحسين حجم الأيقونات على الهواتف */
+@media (max-width: 768px) {
+    .navbar i,
+    .nav-actions i,
+    .hero i,
+    .category-card i,
+    .job-card i,
+    .employer-card i,
+    .step-card i,
+    .footer i,
+    .modal i {
+        font-size: 1rem !important;
+    }
+    
+    /* أيقونات البطاقات */
+    .cat-icon i {
+        font-size: 2rem !important;
+    }
+    
+    /* أيقونات التصنيفات */
+    .categories-grid .category-card i {
+        font-size: 2rem !important;
+    }
+    
+    /* أيقونات البحث */
+    .search-group i {
+        font-size: 1rem !important;
+    }
+    
+    /* أيقونات الفلاتر */
+    .filter-sidebar i {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* دعم أيقونات Font Awesome عبر CDN بديل إذا فشل التحميل */
+@font-face {
+    font-family: 'Font Awesome 6 Free';
+    src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Font Awesome 6 Brands';
+    src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* تأكيد ظهور أيقونات محددة */
+.fa-briefcase:before { content: "\f0b1"; }
+.fa-sign-in-alt:before { content: "\f2f6"; }
+.fa-user-plus:before { content: "\f234"; }
+.fa-bars:before { content: "\f0c9"; }
+.fa-search:before { content: "\f002"; }
+.fa-map-marker-alt:before { content: "\f3c5"; }
+.fa-tag:before { content: "\f02b"; }
+.fa-sliders-h:before { content: "\f1de"; }
+.fa-redo:before { content: "\f01e"; }
+.fa-arrow-left:before { content: "\f060"; }
+.fa-bookmark:before { content: "\f02e"; }
+.fa-user-circle:before { content: "\f2bd"; }
+.fa-check-circle:before { content: "\f058"; }
+.fa-envelope:before { content: "\f0e0"; }
+.fa-phone:before { content: "\f095"; }
+.fa-clock:before { content: "\f017"; }
+.fa-shield-alt:before { content: "\f3ed"; }
+.fa-headset:before { content: "\f590"; }
