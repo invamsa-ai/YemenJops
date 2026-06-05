@@ -1,0 +1,30 @@
+# إعادة توجيه HTTP إلى HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# تفعيل HSTS
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+# منع Clickjacking
+Header always append X-Frame-Options SAMEORIGIN
+
+# سياسة CSP
+Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.firebaseio.com https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebasestorage.app; img-src 'self' data: https://*; frame-src 'self';"
+
+# سياسة COOP
+Header set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+
+# تمكين ضغط Gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache للصفحات الثابتة
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+</IfModule>
