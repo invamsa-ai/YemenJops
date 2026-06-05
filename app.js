@@ -461,8 +461,8 @@ function showPaymentModal() {
                     <p><i class="fas fa-user"></i> <strong>مقدم الطلب:</strong> ${pendingApplication.userName}</p>
                     <p><i class="fas fa-envelope"></i> <strong>البريد:</strong> ${pendingApplication.userEmail}</p>
                     <hr style="border-color:rgba(255,255,255,0.3); margin:15px 0;">
-                    <div style="font-size:1.5rem; text-align:center;">
-                        <strong>المبلغ المطلوب:</strong> <span style="font-size:2rem;">${APPLICATION_FEE.toLocaleString()}</span> ريال يمني
+                    <div style="font-size:1rem; text-align:center;">
+                        <strong>المبلغ المطلوب:</strong> <span style="font-size:1rem;">${APPLICATION_FEE.toLocaleString()}</span> ريال يمني
                     </div>
                 </div>
                 
