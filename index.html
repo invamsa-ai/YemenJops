@@ -168,6 +168,14 @@
                 </div>
             </div>
         </div>
+        <!-- Breadcrumbs for SEO -->
+<nav aria-label="breadcrumb" style="padding: 0 20px; max-width: 1280px; margin: 0 auto;">
+    <ol style="display: flex; list-style: none; gap: 10px; font-size: 0.85rem; flex-wrap: wrap;">
+        <li><a href="/" style="color: var(--primary);">الرئيسية</a></li>
+        <li>/</li>
+        <li><a href="#jobs-section" style="color: var(--text-medium);">الوظائف</a></li>
+    </ol>
+</nav>
     </section>
 
     <!-- ============ MAIN CONTENT ============ -->
@@ -300,29 +308,29 @@
         </section>
 
         <!-- E-E-A-T Section: شهادات المستخدمين (Social Proof) -->
-        <section style="margin-top: 3rem;">
-            <div class="section-header">
-                <h2 class="section-title">ماذا يقول مستخدمونا عن شغلي؟</h2>
-            </div>
-            <div class="steps-row">
-                <div class="step-card" style="text-align:center;">
-                    <i class="fas fa-user-circle" style="font-size: 48px; color: var(--primary);"></i>
-                    <p style="margin-top: 15px; font-style: italic;">"شكراً شغلي، حصلت على وظيفة أحلامي في شركة اتصالات خلال أسبوعين فقط!"</p>
-                    <h4>- أحمد، مهندس شبكات - صنعاء</h4>
-                </div>
-                <div class="step-card" style="text-align:center;">
-                    <i class="fas fa-user-circle" style="font-size: 48px; color: var(--primary);"></i>
-                    <p style="margin-top: 15px; font-style: italic;">"أفضل منصة توظيف يمنية، واجهة سهلة وخدمة عملاء ممتازة. أنصح الجميع بتجربتها."</p>
-                    <h4>- مريم، محاسبة - عدن</h4>
-                </div>
-                <div class="step-card" style="text-align:center;">
-                    <i class="fas fa-user-circle" style="font-size: 48px; color: var(--primary);"></i>
-                    <p style="margin-top: 15px; font-style: italic;">"وظفت 3 موظفين ممتازين من خلال شغلي. عملية توظيف سلسة واحترافية."</p>
-                    <h4>- علي، مدير موارد بشرية - تعز</h4>
-                </div>
-            </div>
-        </section>
-
+        <!-- E-E-A-T Section: شهادات المستخدمين (Social Proof) - محسن SEO -->
+<section style="margin-top: 3rem;">
+    <div class="section-header">
+        <h2 class="section-title">ماذا يقول مستخدمونا عن شغلي؟</h2>
+    </div>
+    <div class="steps-row">
+        <div class="step-card" style="text-align:center;">
+            <i class="fas fa-user-circle" style="font-size: 48px; color: var(--primary);" role="img" aria-label="صورة شخصية لأحمد"></i>
+            <p style="margin-top: 15px; font-style: italic;">"شكراً شغلي، حصلت على وظيفة أحلامي في شركة اتصالات خلال أسبوعين فقط!"</p>
+            <h4>- أحمد، مهندس شبكات - صنعاء</h4>
+        </div>
+        <div class="step-card" style="text-align:center;">
+            <i class="fas fa-user-circle" style="font-size: 48px; color: var(--primary);" role="img" aria-label="صورة شخصية لمريم"></i>
+            <p style="margin-top: 15px; font-style: italic;">"أفضل منصة توظيف يمنية، واجهة سهلة وخدمة عملاء ممتازة. أنصح الجميع بتجربتها."</p>
+            <h4>- مريم، محاسبة - عدن</h4>
+        </div>
+        <div class="step-card" style="text-align:center;">
+            <i class="fas fa-user-circle" style="font-size: 48px; color: var(--primary);" role="img" aria-label="صورة شخصية لعلي"></i>
+            <p style="margin-top: 15px; font-style: italic;">"وظفت 3 موظفين ممتازين من خلال شغلي. عملية توظيف سلسة واحترافية."</p>
+            <h4>- علي، مدير موارد بشرية - تعز</h4>
+        </div>
+    </div>
+</section>
         <!-- E-E-A-T Section: من نحن - بناء المصداقية -->
         <section style="margin-top: 3rem; background: var(--bg-gray); padding: 2rem; border-radius: var(--radius-md);">
             <div class="section-header">
@@ -429,9 +437,8 @@
                     <i class="fas fa-sign-in-alt"></i> دخول
                 </button>
             </form>
-            <p class="modal--text">
-                ليس لديك حساب؟ <a onclick="switchModal('loginModal','registerModal')">سجل الآن مجاناً</a>
-            </p>
+            <!-- استبدل هذا السطر -->
+<p class="modal--text">ليس لديك حساب؟ <a href="#" onclick="switchModal('loginModal','registerModal'); return false;">سجل الآن مجاناً</a></p>
         </div>
     </div>
 
@@ -478,9 +485,8 @@
                     <i class="fas fa-user-plus"></i> إنشاء الحساب مجاناً
                 </button>
             </form>
-            <p class="modal-footer-text">
-                لديك حساب بالفعل؟ <a onclick="switchModal('registerModal','loginModal')">سجل دخول الآن</a>
-            </p>
+           <!-- استبدل هذا السطر -->
+<p class="modal-footer-text">لديك حساب بالفعل؟ <a href="#" onclick="switchModal('registerModal','loginModal'); return false;">سجل دخول الآن</a></p>
         </div>
     </div>
 
