@@ -1130,3 +1130,91 @@ body {
 @media (prefers-color-scheme: dark) {
     /* يمكنك إضافة تنسيقات الوضع المظلم هنا حسب الحاجة */
 }
+/* ============================================ */
+/* تأكيد ظهور الأيقونات على جميع الأجهزة */
+/* ============================================ */
+
+/* جعل جميع الأيقونات تظهر بالقوة */
+i, .fas, .far, .fab, .fa {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* تحسين حجم الأيقونات للهواتف */
+@media (max-width: 768px) {
+    /* أيقونات القائمة الجانبية */
+    .admin-sidebar .nav-item i,
+    .sidebar-nav i {
+        font-size: 1.3rem !important;
+        width: 30px !important;
+        text-align: center;
+        margin-left: 10px;
+    }
+    
+    /* أيقونات البطاقات الإحصائية */
+    .stat-icon i {
+        font-size: 1.8rem !important;
+    }
+    
+    /* أيقونات الأزرار */
+    .btn i,
+    .btn-icon i {
+        font-size: 1.1rem !important;
+    }
+    
+    /* أيقونة زر القائمة */
+    .menu-toggle-dashboard i,
+    .sidebar-toggle i {
+        font-size: 1.4rem !important;
+    }
+    
+    /* أيقونة الصورة الرمزية */
+    .admin-avatar i {
+        font-size: 1.2rem !important;
+    }
+    
+    /* أيقونة الإشعارات */
+    .btn-notification i {
+        font-size: 1.3rem !important;
+    }
+    
+    /* أيقونة تسجيل الخروج */
+    .btn-logout i {
+        font-size: 1.1rem !important;
+    }
+}
+
+/* للشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+    .admin-sidebar .nav-item i {
+        font-size: 1.1rem !important;
+        width: 25px !important;
+    }
+    
+    .stat-icon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .stat-icon i {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* حل لمشكلة Font Awesome في بعض المتصفحات */
+.fa, .fas, .far, .fal, .fad, .fab {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-style: normal;
+    font-variant: normal;
+    line-height: 1;
+}
+
+/* دعم الأحرف الخاصة */
+@font-face {
+    font-family: 'Font Awesome 6 Free';
+    src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2') format('woff2');
+    font-weight: 900;
+    font-display: swap;
+}
